@@ -1,42 +1,64 @@
 import { Images } from '@/assets/images';
 import { logout } from '@/redux/authSlice';
+import { getBandeSortieUnique } from '@/services/charroiService';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    Image,
-    Modal,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { ActivityIndicator, Button, Card, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
+
+const BonSortieCard = ({ data }: { data: any }) => (
+  <Card style={styles.card}>
+    <Card.Content style={{gap:10}}>
+      <Text>🚚 Destination : <Text style={styles.bold}>{data.destination}</Text></Text>
+      <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.chauffeur}</Text></Text>
+      <Text>🚗 Marque : <Text style={styles.bold}>{data.marque}</Text></Text>
+      <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.type}</Text></Text>
+      <Text>🕒 Heure prévue : <Text style={styles.bold}>{data.heurePrevue}</Text></Text>
+      <Text>🕕 Heure retour : <Text style={styles.bold}>{data.heureRetour}</Text></Text>
+    </Card.Content>
+    <Card.Actions>
+      <Button   
+        buttonColor="#007BFF"
+        textColor="#ffffff"
+        mode="contained" 
+        onPress={() => {}}
+      >
+        Valider
+      </Button>
+    </Card.Actions>
+  </Card>
+);
 
 const Home = () => {
   const user = useSelector((state: any) => state.auth?.currentUser);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
+  const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
+  const [bon, setBon] = useState([])
 
-
-    const handleLogout = () => {
+  const handleLogout = () => {
     Alert.alert(
       'Déconnexion',
       'Voulez-vous vraiment vous déconnecter ?',
       [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
+        { text: 'Annuler', style: 'cancel' },
         {
           text: 'Oui, déconnecter',
           style: 'destructive',
@@ -56,62 +78,96 @@ const Home = () => {
       ],
       { cancelable: true }
     );
+  };
+
+  const fetchData = async() => {
+    try {
+      const [ bonData ] = await Promise.all([
+        getBandeSortieUnique(userId),
+      ])
+      setBon(bonData.data)
+    } catch (error) {
+     Alert.alert("Erreur", "Échec de chargement des données.");
+    }
   }
+
+  useEffect(()=> {
+    fetchData()
+  }, [userId])
 
   const closeModal = () => {
     setShowModal(false);
     setModalType(null);
   };
 
+  const fakeBonSortie = [
+    {
+      destination: 'Kinshasa',
+      chauffeur: 'Molato',
+      marque: 'Toyota',
+      type: 'Voiture',
+      heurePrevue: '14h20',
+      heureRetour: '17h30',
+    },
+    {
+      destination: 'Matadi',
+      chauffeur: 'Kanza',
+      marque: 'Hyundai',
+      type: 'Camionnette',
+      heurePrevue: '09h00',
+      heureRetour: '12h30',
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        {/* Header utilisateur */}
-        <View style={styles.wrapper}>
+        {/* Header */}
+        <View style={styles.header}>
           <View style={styles.profileContainer}>
-            <Image source={Images.userIcon} style={styles.image} />
-            <View style={styles.textContainer}>
-              <Text style={styles.name}>{user?.nom}</Text>
-              <Text style={styles.role}>{user?.role}</Text>
+            <Image source={Images.userIcon} style={styles.avatar} />
+            <View>
+              <Text variant="titleMedium">{user?.nom}</Text>
+              <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.logoutIcon} onPress={handleLogout}>
-            <Feather name="log-out" size={25} color="#d9534f" />
+          <TouchableOpacity onPress={handleLogout}>
+            {loading ? (
+              <ActivityIndicator animating size={24} />
+            ) : (
+              <Feather name="log-out" size={24} color="#d9534f" />
+            )}
           </TouchableOpacity>
         </View>
 
-        {/* Titre */}
-        <Text style={styles.titleFirst}>👋 Bienvenue sur DLOG</Text>
+        {/* Welcome Title */}
+        <Text variant="titleLarge" style={styles.title}>👋 Bienvenue sur DLOG</Text>
 
-        {/* Image plein écran */}
-        <View style={{
-          backgroundColor:'#fff',
-          borderRadius: 10,
-          marginBottom: 15,
-        }}>
+        {/* Image */}
+        <Card style={styles.imageCard}>
           <Image source={Images.backIcon} style={styles.backImage} />
+        </Card>
+
+        <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
+
+        <View style={{marginBottom:60}}>
+          {fakeBonSortie.map((item, index) => (
+            <BonSortieCard key={index} data={item} />
+          ))}
         </View>
-        <Text style={styles.titleFirst}>⚙️ Nos fonctionnalités</Text>
       </ScrollView>
 
-    <Modal
-      animationType="slide"
-      transparent={false}
-      visible={showModal}
-      onRequestClose={closeModal}
-    >
-      <SafeAreaView style={{ flex: 1 }}>
-        {/* Bouton de fermeture */}
-        <View style={{ alignItems: 'flex-end', padding: 15 }}>
-          <TouchableOpacity onPress={closeModal}>
-            <Feather name="x" size={28} color="#000" />
-          </TouchableOpacity>
-        </View>
-
-      </SafeAreaView>
-    </Modal>
-
+      {/* Modal */}
+      <Modal animationType="slide" transparent={false} visible={showModal} onRequestClose={closeModal}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={{ alignItems: 'flex-end', padding: 15 }}>
+            <TouchableOpacity onPress={closeModal}>
+              <Feather name="x" size={28} color="#000" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -121,60 +177,51 @@ export default Home;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f9f9f9',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
-    flex: 1,
     paddingHorizontal: 20,
   },
-  wrapper: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 20,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
   },
-  image: {
-    width: 40,
-    height: 40,
-    borderRadius: 50,
-    marginRight: 10,
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
   },
-  textContainer: {
-    justifyContent: 'center'
-  },
-  name: {
-    fontSize: 15,
+  title: {
+    marginVertical: 20,
     fontWeight: 'bold',
   },
-  role: {
-    fontSize: 13,
-    color: '#777',
-  },
-  logoutIcon: {
-    padding: 10,
-  },
-  titleFirst: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 10,
-    marginHorizontal: 10,
+  imageCard: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 20,
   },
   backImage: {
     width: '100%',
     height: 200,
     resizeMode: 'cover',
-    marginBottom: 20,
-    borderRadius: 8,
   },
-  itemsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom:55
+  card: {
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 2,
+    padding: 10
+  },
+
+  bold: {
+    fontWeight: '600',
   },
 });
