@@ -8,25 +8,25 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
-  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { ActivityIndicator, Button, Card, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 
 const BonSortieCard = ({ data }: { data: any }) => (
+
   <Card style={styles.card}>
     <Card.Content style={{gap:10}}>
-      <Text>🚚 Destination : <Text style={styles.bold}>{data.destination}</Text></Text>
-      <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.chauffeur}</Text></Text>
-      <Text>🚗 Marque : <Text style={styles.bold}>{data.marque}</Text></Text>
-      <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.type}</Text></Text>
+      <Text>🚚 Destination : <Text style={styles.bold}>{data.nom_destination}</Text></Text>
+      <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.nom_chauffeur}</Text></Text>
+      <Text>🚗 Marque : <Text style={styles.bold}>{data.nom_marque}</Text></Text>
+      <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
       <Text>🕒 Heure prévue : <Text style={styles.bold}>{data.heurePrevue}</Text></Text>
       <Text>🕕 Heure retour : <Text style={styles.bold}>{data.heureRetour}</Text></Text>
     </Card.Content>
@@ -43,15 +43,24 @@ const BonSortieCard = ({ data }: { data: any }) => (
   </Card>
 );
 
+interface BonSortie {
+  id_bande_sortie: number;
+  nom_destination: string;
+  nom_chauffeur: string;
+  nom_marque: string;
+  nom_cat: string;
+  date_prevue: string;
+  date_retour: string;
+}
+
+
 const Home = () => {
   const user = useSelector((state: any) => state.auth?.currentUser);
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
   const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
-  const [bon, setBon] = useState([])
+  const [bon, setBon] = useState<BonSortie[]>([])
 
   const handleLogout = () => {
     Alert.alert(
@@ -95,30 +104,6 @@ const Home = () => {
     fetchData()
   }, [userId])
 
-  const closeModal = () => {
-    setShowModal(false);
-    setModalType(null);
-  };
-
-  const fakeBonSortie = [
-    {
-      destination: 'Kinshasa',
-      chauffeur: 'Molato',
-      marque: 'Toyota',
-      type: 'Voiture',
-      heurePrevue: '14h20',
-      heureRetour: '17h30',
-    },
-    {
-      destination: 'Matadi',
-      chauffeur: 'Kanza',
-      marque: 'Hyundai',
-      type: 'Camionnette',
-      heurePrevue: '09h00',
-      heureRetour: '12h30',
-    },
-  ];
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -152,22 +137,22 @@ const Home = () => {
         <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
 
         <View style={{marginBottom:60}}>
-          {fakeBonSortie.map((item, index) => (
-            <BonSortieCard key={index} data={item} />
-          ))}
+          {bon.map((item, index) => (
+          <BonSortieCard
+            key={index}
+            data={{
+              nom_destination: item.nom_destination,
+              nom_chauffeur: item.nom_chauffeur,
+              nom_marque: item.nom_marque,
+              type: item.nom_cat,
+              heurePrevue: item.date_prevue ? new Date(item.date_prevue).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
+              heureRetour: item.date_retour ? new Date(item.date_retour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
+            }}
+          />
+))}
+
         </View>
       </ScrollView>
-
-      {/* Modal */}
-      <Modal animationType="slide" transparent={false} visible={showModal} onRequestClose={closeModal}>
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ alignItems: 'flex-end', padding: 15 }}>
-            <TouchableOpacity onPress={closeModal}>
-              <Feather name="x" size={28} color="#000" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
   );
 };
