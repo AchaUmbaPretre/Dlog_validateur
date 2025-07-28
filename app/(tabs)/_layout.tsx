@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { View, useColorScheme } from 'react-native';
+import { TouchableOpacity, View, useColorScheme } from 'react-native';
 
 export default function HomeTabsLayout() {
   const theme = useColorScheme();
@@ -48,29 +48,33 @@ export default function HomeTabsLayout() {
       <Tabs.Screen
         name="plus"
         options={{
-          title: '',
-          tabBarIcon: () => (
-            <View
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: 32,
-                backgroundColor: '#007AFF',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 35,
-                shadowColor: '#007AFF',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 8,
-                elevation: 6,
-              }}
-            >
-              <Ionicons name="add" size={30} color="#fff" />
+            tabBarLabel: () => null,
+            tabBarIcon: () => null, // on ignore l'icône ici
+            tabBarButton: (props) => (
+            <View style={{ position: 'absolute', top: -30, alignSelf: 'center' }}>
+                <TouchableOpacity
+                onPress={props.onPress}
+                style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 32,
+                    backgroundColor: '#007AFF',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    shadowColor: '#007AFF',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 8,
+                    elevation: 6,
+                }}
+                >
+                <Ionicons name="add" size={30} color="#fff" />
+                </TouchableOpacity>
             </View>
-          ),
+            ),
         }}
-      />
+        />
+
       <Tabs.Screen
         name="profil"
         options={{
