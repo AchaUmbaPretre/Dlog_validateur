@@ -26,3 +26,15 @@ export const getBandeSortieUnique = async (id: number): Promise<AxiosResponse<an
     throw error;
   }
 };
+
+
+export const postValidationDemande = async (
+  data: Record<string, any>
+): Promise<AxiosResponse<any>> => {
+  try {
+    return await axios.post(`${BASE_URL}/validation_demande`, data);
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de validation :", error);
+    throw error;
+  }
+};

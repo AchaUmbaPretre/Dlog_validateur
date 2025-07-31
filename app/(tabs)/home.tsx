@@ -1,6 +1,6 @@
 import { Images } from '@/assets/images';
 import { logout } from '@/redux/authSlice';
-import { getBandeSortieUnique } from '@/services/charroiService';
+import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiService';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -16,32 +16,44 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { ActivityIndicator, Button, Card, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, Card, Snackbar, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 
-const BonSortieCard = ({ data }: { data: any }) => (
+const BonSortieCard = ({
+  data,
+  onFinish,
+}: {
+  data: BonSortie & {
+    heurePrevue: string;
+    heureRetour: string;
+  };
+  onFinish: (bon: BonSortie) => void;
+}) => {
 
-  <Card style={styles.card}>
-    <Card.Content style={{gap:10}}>
-      <Text>🚚 Destination : <Text style={styles.bold}>{data.nom_destination}</Text></Text>
-      <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.nom_chauffeur}</Text></Text>
-      <Text>🚗 Marque : <Text style={styles.bold}>{data.nom_marque}</Text></Text>
-      <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
-      <Text>🕒 Heure prévue : <Text style={styles.bold}>{data.heurePrevue}</Text></Text>
-      <Text>🕕 Heure retour : <Text style={styles.bold}>{data.heureRetour}</Text></Text>
-    </Card.Content>
-    <Card.Actions>
-      <Button   
-        buttonColor="#007BFF"
-        textColor="#ffffff"
-        mode="contained" 
-        onPress={() => {}}
-      >
-        Valider
-      </Button>
-    </Card.Actions>
-  </Card>
-);
+  return (
+    <Card style={styles.card}>
+      <Card.Content style={{ gap: 10 }}>
+        <Text>🚚 Destination : <Text style={styles.bold}>{data.nom_destination}</Text></Text>
+        <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.nom_chauffeur}</Text></Text>
+        <Text>🚗 Marque : <Text style={styles.bold}>{data.nom_marque}</Text></Text>
+        <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
+        <Text>🕒 Heure prévue : <Text style={styles.bold}>{data.heurePrevue}</Text></Text>
+        <Text>🕕 Heure retour : <Text style={styles.bold}>{data.heureRetour}</Text></Text>
+      </Card.Content>
+      <Card.Actions>
+          <Button
+            buttonColor="#007BFF"
+            textColor="#ffffff"
+            mode="contained"
+            onPress={() => onFinish(data)}
+          >
+            Valider
+          </Button>
+      </Card.Actions>
+    </Card>
+  );
+};
+
 
 interface BonSortie {
   id_bande_sortie: number;
@@ -61,6 +73,8 @@ const Home = () => {
   const router = useRouter();
   const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
   const [bon, setBon] = useState<BonSortie[]>([])
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const handleLogout = () => {
     Alert.alert(
@@ -99,10 +113,49 @@ const Home = () => {
      Alert.alert("Erreur", "Échec de chargement des données.");
     }
   }
+    useEffect(() => {
+      fetchData();
+        const interval = setInterval(fetchData, 5000)
+        return () => clearInterval(interval)
+    }, []);
 
-  useEffect(()=> {
-    fetchData()
-  }, [userId])
+  const onFinish = (d: BonSortie): void => {
+  const heure = new Date(d.date_prevue).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const message = `🚚 Destination : ${d.nom_destination}\n👨‍✈️ Chauffeur : ${d.nom_chauffeur}\n🚗 Marque : ${d.nom_marque}\n🕒 Heure prévue : ${heure}\n\nSouhaitez-vous valider ce bon ?`;
+
+  Alert.alert(
+    'Confirmation de validation',
+    message,
+    [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Confirmer',
+        style: 'default',
+        onPress: async () => {
+          const value = {
+            ...d,
+            validateur_id: userId,
+          };
+
+          try {
+            await postValidationDemande(value);
+            setSnackbarMessage(`✅ Bon validé : ${d.nom_destination} avec ${d.nom_chauffeur} (${d.nom_marque}) à ${heure}`);
+            setSnackbarVisible(true);
+            fetchData();
+          } catch (error) {
+            Alert.alert('❌ Erreur', "Impossible de valider ce bon de sortie.");
+          }
+        },
+      },
+    ],
+    { cancelable: true }
+  );
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -136,24 +189,47 @@ const Home = () => {
 
         <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
 
-        <View style={{marginBottom:60}}>
+        <View style={{ marginBottom: 60 }}>
           {bon.map((item, index) => (
-          <BonSortieCard
-            key={index}
-            data={{
-              nom_destination: item.nom_destination,
-              nom_chauffeur: item.nom_chauffeur,
-              nom_marque: item.nom_marque,
-              type: item.nom_cat,
-              heurePrevue: item.date_prevue ? new Date(item.date_prevue).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
-              heureRetour: item.date_retour ? new Date(item.date_retour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
-            }}
-          />
-))}
-
+            <BonSortieCard
+              key={index}
+              data={{
+                ...item,
+                heurePrevue: item.date_prevue
+                  ? new Date(item.date_prevue).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })
+                  : '',
+                heureRetour: item.date_retour
+                  ? new Date(item.date_retour).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })
+                  : '',
+              }}
+              onFinish={onFinish}
+            />
+          ))}
         </View>
+
       </ScrollView>
+      <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={5000}
+          action={{
+            label: 'Fermer',
+            onPress: () => setSnackbarVisible(false),
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
+
     </SafeAreaView>
+    
   );
 };
 
