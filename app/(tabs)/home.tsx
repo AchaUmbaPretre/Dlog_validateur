@@ -190,29 +190,35 @@ const Home = () => {
         <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
 
         <View style={{ marginBottom: 60 }}>
-          {bon.map((item, index) => (
-            <BonSortieCard
-              key={index}
-              data={{
-                ...item,
-                heurePrevue: item.date_prevue
-                  ? new Date(item.date_prevue).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })
-                  : '',
-                heureRetour: item.date_retour
-                  ? new Date(item.date_retour).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })
-                  : '',
-              }}
-              onFinish={onFinish}
-            />
-          ))}
+          {bon.length === 0 ? (
+            <View style={{ alignItems: 'center', marginTop: 40 }}>
+              <Text style={{ color: '#888' }}>Aucun bon de sortie disponible</Text>
+            </View>
+          ) : (
+            bon.map((item, index) => (
+              <BonSortieCard
+                key={index}
+                data={{
+                  ...item,
+                  heurePrevue: item.date_prevue
+                    ? new Date(item.date_prevue).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })
+                    : '',
+                  heureRetour: item.date_retour
+                    ? new Date(item.date_retour).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })
+                    : '',
+                }}
+                onFinish={onFinish}
+              />
+            ))
+          )}
         </View>
 
       </ScrollView>
