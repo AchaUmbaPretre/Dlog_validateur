@@ -9,10 +9,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
-  Platform,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View
@@ -41,6 +38,7 @@ const BonSortieCard = ({
         <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
         <Text>🕒 Date et heure prévue : <Text style={styles.bold}>{data.dateHeurePrevue}</Text></Text>
         <Text>🕕 Date et heure retour : <Text style={styles.bold}>{data.dateHeureRetour}</Text></Text>
+        <Text>👨‍✈️ Crée par : <Text style={styles.bold}>{data.user_cr}</Text></Text>
 
       </Card.Content>
       <Card.Actions>
@@ -164,7 +162,7 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <ScrollView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -195,7 +193,7 @@ const Home = () => {
 
         <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
 
-        <View style={{ marginBottom: 60 }}>
+        <View style={{ marginBottom: 40 }}>
           {bon.length === 0 ? (
             <View style={{ alignItems: 'center', marginTop: 40 }}>
               <Text style={{ color: '#888' }}>Aucun bon de sortie disponible</Text>
@@ -247,19 +245,17 @@ const Home = () => {
         </View>
       </ScrollView>
       <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={5000}
-          action={{
-            label: 'Fermer',
-            onPress: () => setSnackbarVisible(false),
-          }}
-        >
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={5000}
+        action={{
+          label: 'Fermer',
+          onPress: () => setSnackbarVisible(false),
+        }}
+      >
           {snackbarMessage}
         </Snackbar>
-
-    </SafeAreaView>
-    
+    </View>
   );
 };
 
@@ -268,8 +264,7 @@ export default Home;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingVertical: 10
   },
   container: {
     paddingHorizontal: 20,

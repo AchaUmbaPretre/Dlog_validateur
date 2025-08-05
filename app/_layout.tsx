@@ -1,11 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Slot } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, useColorScheme, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Provider, useDispatch } from 'react-redux';
 import { setToken, setUser } from '../redux/authSlice';
 import { store } from '../redux/store';
-import { StatusBar } from 'expo-status-bar';
+
+const { height } = Dimensions.get('window');
 
 
 
@@ -43,12 +46,33 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
   return (
     <Provider store={store}>
-      <AuthInitializer>
-        <StatusBar hidden />
-        <Slot />
-      </AuthInitializer>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <AuthInitializer>
+          <Slot />
+        </AuthInitializer>
+      </SafeAreaView>
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+});
