@@ -16,6 +16,14 @@ const fetchData = async (endpoint: string): Promise<AxiosResponse<any>> => {
   }
 };
 
+export const getCatVehicule = () => fetchData('cat_vehicule');
+export const getSortieVisiteur = () => fetchData('visiteur_retour');
+export const getVehiculeDispo = () => fetchData('vehicule_dispo');
+export const getChauffeur = () => fetchData('chauffeur');
+export const getServiceDemandeur = () => fetchData('serviceDemadeur');
+export const getMotif = () => fetchData('motif');
+export const getDestination = () => fetchData('destination');
+
 export const getBandeSortieUnique = async (id: number): Promise<AxiosResponse<any>> => {
   try {
     return await axios.get(`${BASE_URL}/bande_sortie_unique`, {
