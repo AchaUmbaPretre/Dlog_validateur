@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 
-const bonSortieScreen = () => {
+const BonSortieScreen = () => {
   return (
     <View>
       <Text>bonSortieScreen</Text>
@@ -9,6 +9,6 @@ const bonSortieScreen = () => {
   )
 }
 
-export default bonSortieScreen
+export default BonSortieScreen
 
 const styles = StyleSheet.create({})

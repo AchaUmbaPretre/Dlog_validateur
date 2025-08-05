@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
-const listBonScreen = () => {
+const ListBonScreen = () => {
   return (
     <View>
       <Text>listBonScreen</Text>
@@ -9,6 +9,6 @@ const listBonScreen = () => {
   )
 }
 
-export default listBonScreen
+export default ListBonScreen
 
 const styles = StyleSheet.create({})

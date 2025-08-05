@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const listReservationScreen = () => {
+const ListReservationScreen = () => {
   return (
     <View>
       <Text>listReservationScreen</Text>
@@ -9,6 +9,6 @@ const listReservationScreen = () => {
   )
 }
 
-export default listReservationScreen
+export default ListReservationScreen
 
 const styles = StyleSheet.create({})
