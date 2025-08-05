@@ -59,7 +59,7 @@ interface FormState {
   id_client: number | null;
   id_destination: number | null;
   personne_bord: string;
-  autorise_par: string;
+  commentaire: string;
 }
 
 const BonSortieScreen: React.FC = () => {
@@ -81,7 +81,7 @@ const BonSortieScreen: React.FC = () => {
     id_client: null,
     id_destination: null,
     personne_bord: "",
-    autorise_par: "",
+    commentaire: "",
   });
 
   const [datePrevue, setDatePrevue] = useState<Date | null>(null);
@@ -148,7 +148,7 @@ const BonSortieScreen: React.FC = () => {
         id_client: null,
         id_destination: null,
         personne_bord: "",
-        autorise_par: "",
+        commentaire: "",
       });
       setDatePrevue(null);
       setDateRetour(null);
@@ -277,12 +277,12 @@ const BonSortieScreen: React.FC = () => {
                   style={styles.input}
                 />
 
-                <Text style={styles.label}>Autorisé par *</Text>
+                <Text style={styles.label}>Commentaire *</Text>
                 <TextInput
                   mode="outlined"
-                  placeholder="Nom du chef"
+                  placeholder="Commenter..."
                   value={form.autorise_par}
-                  onChangeText={(val) => handleChange("autorise_par", val)}
+                  onChangeText={(val) => handleChange("commentaire", val)}
                   style={styles.input}
                 />
 
