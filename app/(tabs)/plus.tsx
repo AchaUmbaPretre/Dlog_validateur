@@ -4,10 +4,10 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const Plus = () => {
   const options = [
-    { label: 'Réservation', icon: Images.reservationIcon },
-    { label: 'Liste Réservations', icon: Images.listReservation },
-    { label: 'Bon de sortie', icon: Images.bonIcon },
-    { label: 'Liste des bons', icon: Images.listBonIcon },
+    { label: 'Réservation', icon: Images.reservationIcon, bgColor: 'rgba(0, 122, 255, 0.1)' },        // Bleu
+    { label: 'Liste Réservations', icon: Images.listReservation, bgColor: 'rgba(52, 199, 89, 0.1)' }, // Vert
+    { label: 'Bon de sortie', icon: Images.bonIcon, bgColor: 'rgba(255, 149, 0, 0.1)' },              // Orange
+    { label: 'Liste des bons', icon: Images.listBonIcon, bgColor: 'rgba(255, 59, 48, 0.1)' },         // Rouge
   ]
 
   return (
@@ -15,7 +15,9 @@ const Plus = () => {
       {options.map((item, index) => (
         <TouchableOpacity key={index} style={styles.card} activeOpacity={0.7}>
           <View style={styles.cardContent}>
-            <Image source={item.icon} style={styles.icon} />
+            <View style={[styles.iconWrapper, { backgroundColor: item.bgColor }]}>
+              <Image source={item.icon} style={styles.icon} />
+            </View>
             <Text style={styles.label}>{item.label}</Text>
           </View>
         </TouchableOpacity>
@@ -55,11 +57,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  icon: {
-    height: 48,
-    width: 48,
+  iconWrapper: {
+    padding: 12,
+    borderRadius: 16,
     marginBottom: 12,
-    borderRadius: 10,
+  },
+  icon: {
+    height: 40,
+    width: 40,
+    resizeMode: 'contain',
   },
   label: {
     fontSize: 14,
