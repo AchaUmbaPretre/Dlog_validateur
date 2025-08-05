@@ -4,6 +4,7 @@ import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiS
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -24,9 +25,9 @@ const BonSortieCard = ({
   onFinish,
 }: {
   data: BonSortie & {
-    heurePrevue: string;
-    heureRetour: string;
-  };
+  dateHeurePrevue: string;
+  dateHeureRetour: string;
+};
   onFinish: (bon: BonSortie) => void;
 }) => {
 
@@ -36,9 +37,11 @@ const BonSortieCard = ({
         <Text>🚚 Destination : <Text style={styles.bold}>{data.nom_destination}</Text></Text>
         <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.nom_chauffeur}</Text></Text>
         <Text>🚗 Marque : <Text style={styles.bold}>{data.nom_marque}</Text></Text>
+        <Text>🚗 Plaque : <Text style={styles.bold}>{data.immatriculation}</Text></Text>
         <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
-        <Text>🕒 Heure prévue : <Text style={styles.bold}>{data.heurePrevue}</Text></Text>
-        <Text>🕕 Heure retour : <Text style={styles.bold}>{data.heureRetour}</Text></Text>
+        <Text>🕒 Date et heure prévue : <Text style={styles.bold}>{data.dateHeurePrevue}</Text></Text>
+        <Text>🕕 Date et heure retour : <Text style={styles.bold}>{data.dateHeureRetour}</Text></Text>
+
       </Card.Content>
       <Card.Actions>
           <Button
@@ -63,6 +66,8 @@ interface BonSortie {
   nom_cat: string;
   date_prevue: string;
   date_retour: string;
+  immatriculation: string;
+  user_cr: string;
 }
 
 
@@ -113,6 +118,7 @@ const Home = () => {
      Alert.alert("Erreur", "Échec de chargement des données.");
     }
   }
+
     useEffect(() => {
       fetchData();
         const interval = setInterval(fetchData, 5000)
@@ -155,7 +161,7 @@ const Home = () => {
     ],
     { cancelable: true }
   );
-};
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -195,32 +201,50 @@ const Home = () => {
               <Text style={{ color: '#888' }}>Aucun bon de sortie disponible</Text>
             </View>
           ) : (
-            bon.map((item, index) => (
-              <BonSortieCard
-                key={index}
-                data={{
-                  ...item,
-                  heurePrevue: item.date_prevue
-                    ? new Date(item.date_prevue).toLocaleTimeString('fr-FR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                      })
-                    : '',
-                  heureRetour: item.date_retour
-                    ? new Date(item.date_retour).toLocaleTimeString('fr-FR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                      })
-                    : '',
-                }}
-                onFinish={onFinish}
-              />
-            ))
+            <>
+              {['aujourdhui', 'avenir', 'retard'].map((etat) => {
+                const filtered = bon.filter((item) => {
+                  const datePrevue = moment.utc(item.date_prevue);
+                  const today = moment.utc().startOf('day');
+
+                  if (etat === 'aujourdhui') return datePrevue.isSame(today, 'day');
+                  if (etat === 'avenir') return datePrevue.isAfter(today, 'day');
+                  if (etat === 'retard') return datePrevue.isBefore(today, 'day');
+                  return false;
+                });
+
+                if (filtered.length === 0) return null;
+
+                const titre = {
+                  retard: '🚨 En retard',
+                  aujourdhui: '📅 Aujourd’hui',
+                  avenir: '⏳ À venir',
+                }[etat];
+
+                return (
+                  <View key={etat} style={{ marginBottom: 20 }}>
+                    <Text variant="titleMedium" style={{ marginBottom: 10 }}>{titre}</Text>
+                    {filtered.map((item, index) => (
+                      <BonSortieCard
+                        key={`${etat}-${index}`}
+                        data={{
+                          ...item,
+                          dateHeurePrevue: item.date_prevue
+                            ? moment.utc(item.date_prevue).format('DD-MM-YYYY HH:mm')
+                            : '',
+                          dateHeureRetour: item.date_retour
+                            ? moment.utc(item.date_retour).format('DD-MM-YYYY HH:mm')
+                            : '',
+                        }}
+                        onFinish={onFinish}
+                      />
+                    ))}
+                  </View>
+                );
+              })}
+            </>
           )}
         </View>
-
       </ScrollView>
       <Snackbar
           visible={snackbarVisible}
