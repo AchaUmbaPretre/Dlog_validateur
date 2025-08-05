@@ -1,28 +1,87 @@
-import { Images } from '@/assets/images'
-import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Images } from '@/assets/images';
+import { Feather } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import BonSortieScreen from '../screens/bonSortieScreen';
+import CourseScreen from '../screens/CourseScreen';
+import ListBonScreen from '../screens/listBonScreen';
+import ListCourseScreen from '../screens/listCourseScreen';
 
 const Plus = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<string | null>(null);
+
   const options = [
-    { label: 'Réservation', icon: Images.reservationIcon, bgColor: 'rgba(0, 122, 255, 0.1)' },        // Bleu
-    { label: 'Liste Réservations', icon: Images.listReservation, bgColor: 'rgba(52, 199, 89, 0.1)' }, // Vert
-    { label: 'Bon de sortie', icon: Images.bonIcon, bgColor: 'rgba(255, 149, 0, 0.1)' },              // Orange
-    { label: 'Liste des bons', icon: Images.listBonIcon, bgColor: 'rgba(255, 59, 48, 0.1)' },         // Rouge
+    { label: 'Course', icon: Images.reservationIcon, bgColor: 'rgba(0, 122, 255, 0.1)' },
+    { label: 'Liste des courses', icon: Images.listReservation, bgColor: 'rgba(52, 199, 89, 0.1)' },
+    { label: 'Bon de sortie', icon: Images.bonIcon, bgColor: 'rgba(255, 149, 0, 0.1)' },
+    { label: 'Liste des bons', icon: Images.listBonIcon, bgColor: 'rgba(255, 59, 48, 0.1)' },
   ]
 
+  const openModal = (type: string) => {
+    setModalType(type);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalType(null);
+  };
+
+  const renderModalContent = () => {
+    switch (modalType) {
+      case 'course':
+        return <CourseScreen />;
+      case 'listCourse':
+        return <ListCourseScreen />;
+      case 'bon':
+        return <BonSortieScreen />;
+      case 'listBon':
+        return <ListBonScreen />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {options.map((item, index) => (
-        <TouchableOpacity key={index} style={styles.card} activeOpacity={0.7}>
-          <View style={styles.cardContent}>
-            <View style={[styles.iconWrapper, { backgroundColor: item.bgColor }]}>
-              <Image source={item.icon} style={styles.icon} />
+    <>
+      <View style={styles.container}>
+        {options.map((item, index) => (
+          <TouchableOpacity key={index} style={styles.card} activeOpacity={0.7}>
+            <View style={styles.cardContent}>
+              <View style={[styles.iconWrapper, { backgroundColor: item.bgColor }]}>
+                <Image source={item.icon} style={styles.icon} />
+              </View>
+              <Text style={styles.label}>{item.label}</Text>
             </View>
-            <Text style={styles.label}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showModal}
+        onRequestClose={closeModal}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          {/* Bouton de fermeture */}
+          <View style={{ alignItems: 'flex-end', padding: 15 }}>
+            <TouchableOpacity onPress={closeModal}>
+              <Feather name="x" size={28} color="#000" />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
-      ))}
-    </View>
+
+          {/* Contenu du modal */}
+          <View style={{ flex: 1 }}>
+            {renderModalContent()}
+          </View>
+        </SafeAreaView>
+      </Modal>
+    </>
+
+    
   )
 }
 
