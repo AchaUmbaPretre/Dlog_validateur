@@ -2,24 +2,58 @@ import { Images } from '@/assets/images';
 import { Feather } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
+  Alert,
   Image,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 import BonSortieScreen from '../screens/bonSortieScreen';
 import CourseScreen from '../screens/courseScreen';
 import ListBonScreen from '../screens/listBonScreen';
 import ListCourseScreen from '../screens/listCourseScreen';
 
+
 type ModalType = 'course' | 'listCourse' | 'bon' | 'listBon' | null;
 
 const Plus = () => {
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state: any) => state.auth?.currentUser);
+  const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
+
+    const handleLogout = () => {
+    Alert.alert(
+      'Déconnexion',
+      'Voulez-vous vraiment vous déconnecter ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Oui, déconnecter',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              dispatch(logout());
+              await AsyncStorage.multiRemove(['token', 'user']);
+              router.replace('/login');
+            } catch (error) {
+              console.error('Erreur lors de la déconnexion :', error);
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const options: {
     label: string;
@@ -80,6 +114,28 @@ const Plus = () => {
 
   return (
     <>
+        <View style={styles.header}>
+          <View style={styles.profileContainer}>
+            <Image source={Images.userIcon} style={styles.avatar} />
+          <View>
+            <Text variant="titleMedium">{user?.nom}</Text>
+            <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
+          </View>
+        </View>      
+        <TouchableOpacity onPress={handleLogout}>
+            {loading ? (
+              <ActivityIndicator animating size={24} />
+            ) : (
+              <Feather name="log-out" size={24} color="#d9534f" />
+            )}
+          </TouchableOpacity>
+        </View>
+      <View style={styles.imageCard}>
+        <Image source={Images.validateurIcon} style={styles.backImage} />
+      </View>
+
+      <Text variant="titleLarge" style={styles.title}>⚙️ Nos options</Text>
+
       <View style={styles.container}>
         {options.map((item, index) => (
           <TouchableOpacity
@@ -122,6 +178,40 @@ const Plus = () => {
 export default Plus;
 
 const styles = StyleSheet.create({
+    header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+    title: {
+    marginVertical: 15,
+    fontWeight: 'bold',
+    paddingHorizontal: 20,
+  },
+    backImage: {
+    width: '100%',
+    height: 180,
+    resizeMode: 'cover',
+  },
+    imageCard: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 20,
+    paddingHorizontal: 20
+  },
   container: {
     flex: 1,
     backgroundColor: '#f7f9fc',
