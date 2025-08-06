@@ -130,13 +130,14 @@ const BonSortieScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif || !form.id_demandeur || !form.autorise_par) {
+    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif || !form.id_demandeur ) {
       Alert.alert("Champs requis", "Veuillez remplir tous les champs obligatoires (*)");
       return;
     }
 
     try {
       setLoadingData(true);
+      console.log(form)
       // Appel API désactivé temporairement
       // await postSortieVehiculeExceptionnel({ ...form, id_agent: userId });
       Alert.alert("Succès", "Course enregistrée avec succès !");
