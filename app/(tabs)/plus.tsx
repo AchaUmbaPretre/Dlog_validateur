@@ -1,13 +1,16 @@
 import { Images } from '@/assets/images';
 import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import React, { useState } from 'react';
 import {
   Alert,
   Image,
   Modal,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
-  View,
+  useColorScheme,
+  View
 } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,18 +20,19 @@ import CourseScreen from '../screens/courseScreen';
 import ListBonScreen from '../screens/listBonScreen';
 import ListCourseScreen from '../screens/listCourseScreen';
 
-
 type ModalType = 'course' | 'listCourse' | 'bon' | 'listBon' | null;
 
 const Plus = () => {
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.auth?.currentUser);
-  const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-    const handleLogout = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state: any) => state.auth?.currentUser);
+
+  const handleLogout = () => {
     Alert.alert(
       'Déconnexion',
       'Voulez-vous vraiment vous déconnecter ?',
@@ -44,7 +48,7 @@ const Plus = () => {
               await AsyncStorage.multiRemove(['token', 'user']);
               router.replace('/login');
             } catch (error) {
-              console.error('Erreur lors de la déconnexion :', error);
+              console.error('Erreur de déconnexion :', error);
             } finally {
               setLoading(false);
             }
@@ -55,12 +59,7 @@ const Plus = () => {
     );
   };
 
-  const options: {
-    label: string;
-    icon: any;
-    bgColor: string;
-    modalKey: ModalType;
-  }[] = [
+  const options = [
     {
       label: 'Course',
       icon: Images.reservationIcon,
@@ -88,6 +87,7 @@ const Plus = () => {
   ];
 
   const openModal = (type: ModalType) => {
+    Haptics.selectionAsync(); // Haptic feedback UX
     setModalType(type);
     setShowModal(true);
   };
@@ -113,49 +113,72 @@ const Plus = () => {
   };
 
   return (
-    <>
-        <View style={styles.header}>
-          <View style={styles.profileContainer}>
-            <Image source={Images.userIcon} style={styles.avatar} />
-          <View>
-            <Text variant="titleMedium">{user?.nom}</Text>
-            <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
-          </View>
-        </View>      
-        <TouchableOpacity onPress={handleLogout}>
-            {loading ? (
-              <ActivityIndicator animating size={24} />
-            ) : (
-              <Feather name="log-out" size={24} color="#d9534f" />
-            )}
-          </TouchableOpacity>
+    <View style={[styles.containerGlo, isDark && { backgroundColor: '#1c1c1e' }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.profileContainer}>
+          <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>
+            {(user?.nom || '')
+              .split(' ')
+              .slice(0, 2)
+              .map(word => word.charAt(0).toUpperCase())
+              .join('')}
+          </Text>
         </View>
-      <View style={styles.imageCard}>
-        <Image source={Images.validateurIcon} style={styles.backImage} />
+      <View>
+    <Text variant="titleMedium">{user?.nom}</Text>
+    <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
+  </View>
+</View>
+
+        <TouchableOpacity onPress={handleLogout}>
+          {loading ? (
+            <ActivityIndicator animating size={24} />
+          ) : (
+            <Feather name="log-out" size={24} color="#d9534f" />
+          )}
+        </TouchableOpacity>
       </View>
 
-      <Text variant="titleLarge" style={styles.title}>⚙️ Nos options</Text>
+      {/* Banner Image */}
+      <View style={styles.imageCard}>
+        <Image source={Images.validateurIcon} style={styles.backImage} />
+        <View style={styles.overlay}>
+          <Text style={styles.overlayText}>Bienvenue 👋</Text>
+        </View>
+      </View>
 
+      {/* Title */}
+      <Text variant="titleLarge" style={[styles.title, isDark && { color: '#fff' }]}>
+        ⚙️ Nos options
+      </Text>
+
+      {/* Options Grid */}
       <View style={styles.container}>
         {options.map((item, index) => (
-          <TouchableOpacity
+          <Pressable
             key={index}
-            style={styles.card}
-            activeOpacity={0.7}
             onPress={() => openModal(item.modalKey)}
+            android_ripple={{ color: '#ccc', borderless: false }}
+            style={({ pressed }) => [
+              styles.card,
+              {
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              },
+            ]}
           >
             <View style={styles.cardContent}>
-              <View
-                style={[styles.iconWrapper, { backgroundColor: item.bgColor }]}
-              >
+              <View style={[styles.iconWrapper, { backgroundColor: item.bgColor }]}>
                 <Image source={item.icon} style={styles.icon} />
               </View>
-              <Text style={styles.label}>{item.label}</Text>
+              <Text style={[styles.label, isDark && { color: '#eee' }]}>{item.label}</Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
+      {/* Modal */}
       <Modal
         animationType="slide"
         transparent={false}
@@ -165,26 +188,45 @@ const Plus = () => {
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={closeModal}>
-              <Feather name="x" size={28} color="#000" />
+              <Feather name="x" size={28} color={isDark ? '#fff' : '#000'} />
             </TouchableOpacity>
           </View>
           <View style={{ flex: 1 }}>{renderModalContent()}</View>
         </SafeAreaView>
       </Modal>
-    </>
+    </View>
   );
 };
 
 export default Plus;
 
 const styles = StyleSheet.create({
-    header: {
+  avatarCircle: {
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: '#007bff',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+avatarText: {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+  containerGlo: {
+    flex: 1,
+    backgroundColor: '#f7f9fc',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
     paddingHorizontal: 20,
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   profileContainer: {
     flexDirection: 'row',
@@ -196,27 +238,40 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
   },
-    title: {
+  title: {
     marginVertical: 15,
     fontWeight: 'bold',
     paddingHorizontal: 20,
+    color: '#111',
   },
-    backImage: {
+  backImage: {
     width: '100%',
     height: 180,
     resizeMode: 'cover',
+    borderRadius: 12,
   },
-    imageCard: {
+  overlay: {
+    position: 'absolute',
+    bottom: 10,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  overlayText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  imageCard: {
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f7f9fc',
-    paddingHorizontal: 16,
-    paddingTop: 20,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',

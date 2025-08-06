@@ -1,8 +1,10 @@
 import { Images } from '@/assets/images';
 import { logout } from '@/redux/authSlice';
 import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiService';
+import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -117,48 +119,67 @@ const Home = () => {
     }
   }
 
-    useEffect(() => {
-      fetchData();
-        const interval = setInterval(fetchData, 5000)
-        return () => clearInterval(interval)
-    }, []);
+useEffect(() => {
+  fetchData();
 
-  const onFinish = (d: BonSortie): void => {
-  const heure = new Date(d.date_prevue).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
+  const interval = setInterval(fetchData, 5000);
+
+  const unsubscribe = NetInfo.addEventListener(state => {
+    if (state.isConnected) {
+      syncPendingValidations(
+        () => {
+          setSnackbarMessage("✅ Données hors ligne synchronisées.");
+          setSnackbarVisible(true);
+          fetchData();
+        },
+        (err) => {
+          console.log("❌ Erreur de synchro :", err);
+        }
+      );
+    }
   });
 
-  const message = `🚚 Destination : ${d.nom_destination}\n👨‍✈️ Chauffeur : ${d.nom_chauffeur}\n🚗 Marque : ${d.nom_marque}\n🕒 Heure prévue : ${heure}\n\nSouhaitez-vous valider ce bon ?`;
+  return () => {
+    clearInterval(interval);
+    unsubscribe(); 
+  };
+}, []);
 
-  Alert.alert(
-    'Confirmation de validation',
-    message,
-    [
+
+  const onFinish = (d: BonSortie): void => {
+    const heure = new Date(d.date_prevue).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    const message = `🚚 Destination : ${d.nom_destination}\n👨‍✈️ Chauffeur : ${d.nom_chauffeur}\n🚗 Marque : ${d.nom_marque}\n🕒 Heure prévue : ${heure}\n\nSouhaitez-vous valider ce bon ?`;
+
+    Alert.alert('Confirmation de validation', message, [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Confirmer',
         style: 'default',
         onPress: async () => {
-          const value = {
-            ...d,
-            validateur_id: userId,
-          };
+          const payload = { ...d, validateur_id: userId };
 
-          try {
-            await postValidationDemande(value);
-            setSnackbarMessage(`✅ Bon validé : ${d.nom_destination} avec ${d.nom_chauffeur} (${d.nom_marque}) à ${heure}`);
-            setSnackbarVisible(true);
-            fetchData();
-          } catch (error) {
-            Alert.alert('❌ Erreur', "Impossible de valider ce bon de sortie.");
+          if (await isOnline()) {
+            try {
+              await postValidationDemande(payload);
+              setSnackbarMessage(`✅ Bon validé en ligne`);
+              fetchData();
+            } catch (error) {
+              setSnackbarMessage(`❌ Erreur de validation en ligne`);
+            }
+          } else {
+            await storePendingValidation(payload);
+            setSnackbarMessage(`📦 Bon sauvegardé hors ligne`);
           }
+
+          setSnackbarVisible(true);
         },
       },
-    ],
-    { cancelable: true }
-  );
+    ]);
   };
 
   return (
