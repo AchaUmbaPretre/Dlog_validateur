@@ -122,7 +122,7 @@ const Plus = () => {
               {(user?.nom || '')
                 .split(' ')
                 .slice(0, 2)
-                .map(word => word.charAt(0).toUpperCase())
+                .map((word: string) => word.charAt(0).toUpperCase())
                 .join('')}
             </Text>
         </View>

@@ -151,21 +151,29 @@ useEffect(() => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.profileContainer}>
-            <Image source={Images.userIcon} style={styles.avatar} />
-            <View>
-              <Text variant="titleMedium">{user?.nom}</Text>
-              <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
-            </View>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {(user?.nom || '')
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((word: string) => word.charAt(0).toUpperCase())
+                  .join('')}
+                </Text>
+                </View>
+              <View>
+            <Text variant="titleMedium">{user?.nom}</Text>
+            <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
           </View>
-
-          <TouchableOpacity onPress={handleLogout}>
-            {loading ? (
-              <ActivityIndicator animating size={24} />
-            ) : (
-              <Feather name="log-out" size={24} color="#d9534f" />
-            )}
-          </TouchableOpacity>
         </View>
+        
+                <TouchableOpacity onPress={handleLogout}>
+                  {loading ? (
+                    <ActivityIndicator animating size={24} />
+                  ) : (
+                    <Feather name="log-out" size={24} color="#d9534f" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
         {/* Welcome Title */}
         <Text variant="titleLarge" style={styles.title}>👋 Bienvenue sur DLOG</Text>
@@ -257,7 +265,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
   profileContainer: {
     flexDirection: 'row',
@@ -269,6 +276,19 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
   },
+  avatarCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#007bff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
   title: {
     marginVertical: 20,
     fontWeight: 'bold',
