@@ -1,7 +1,7 @@
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 
 import { useFetchData } from "@/hooks/useFetchData";
 import { RootState } from "@/redux/store";
-import { postAffectationDemande } from "@/services/charroiService";
+import { getAffectationDemandeOne, postBandeSortie } from "@/services/charroiService";
 import { FormState } from "@/types";
 
 interface ShowPickerState {
@@ -49,7 +49,6 @@ const BonSortieScreen: React.FC = () => {
     fetchDatas,
   } = useFetchData();
 
-  const [affectationId, setAffectationId] = useState<number | null>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -63,16 +62,48 @@ const BonSortieScreen: React.FC = () => {
     personne_bord: "",
     commentaire: "",
   });
-
+  const { affectationId } = useLocalSearchParams();
   const [datePrevue, setDatePrevue] = useState<Date | null>(null);
   const [dateRetour, setDateRetour] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<ShowPickerState | null>(null);
 
   const router = useRouter();
+  const affectationIdNumber = Array.isArray(affectationId)
+    ? Number(affectationId[0])
+    : Number(affectationId);
 
   const handleChange = (name: keyof FormState, value: any) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+const fetchData = async () => {
+  try {
+    const { data } = await getAffectationDemandeOne(affectationIdNumber);
+    console.log(data)
+    if (data) {
+      setForm({
+        id_vehicule: data.id_vehicule ?? null,
+        id_chauffeur: data.id_chauffeur ?? null,
+        id_motif_demande: data.id_motif_demande ?? null,
+        id_demandeur: data.id_demandeur ?? null,
+        id_client: data.id_client ?? null,
+        id_destination: data.id_destination ?? null,
+        personne_bord: data.personne_bord || '',
+        commentaire: data.commentaire || '',
+      });
+
+      setDatePrevue(data.date_prevue ? new Date(data.date_prevue) : null);
+      setDateRetour(data.date_retour ? new Date(data.date_retour) : null);
+    }
+  } catch (error) {
+    console.log("Erreur fetch affectation:", error);
+  }
+};
+
+
+      useEffect(()=> {
+        fetchData()
+      }, [affectationId])
 
   const handleSubmit = async () => {
     if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande || !form.id_demandeur) {
@@ -81,11 +112,8 @@ const BonSortieScreen: React.FC = () => {
     }
 
     try {
-      const response = await postAffectationDemande({ ...form, date_prevue: datePrevue, date_retour: dateRetour, user_cr: userId });
+       await postBandeSortie({ ...form, date_prevue: datePrevue, date_retour: dateRetour,  id_affectation_demande : affectationId, user_cr: userId });
       Alert.alert("Succès", "Course enregistrée avec succès !");
-
-      const newId = Number(response.data?.id_affectation);
-      setAffectationId(newId);
 
       setForm({
         id_vehicule: null,
@@ -102,12 +130,8 @@ const BonSortieScreen: React.FC = () => {
 
       fetchDatas();
 
-      // if (createBS && newId) {
-      //   setModalType("Bande");
-      //   setShowModal(true);
-      // }
     } catch (error) {
-      Alert.alert("Erreur", "Impossible d'enregistrer le retour.");
+      Alert.alert("Erreur", "Impossible d'enregistrer le bon.");
     }
   };
 

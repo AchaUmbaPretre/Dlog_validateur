@@ -112,10 +112,11 @@ const CourseScreen: React.FC = () => {
 
       fetchDatas();
 
-      // if (createBS && newId) {
-      //   setModalType("Bande");
-      //   setShowModal(true);
-      // }
+      router.push({
+        pathname: '/screens/bonSortieScreen',
+        params: { affectationId: String(newId) }
+      });
+
     } catch (error) {
       Alert.alert("Erreur", "Impossible d'enregistrer le retour.");
     }
