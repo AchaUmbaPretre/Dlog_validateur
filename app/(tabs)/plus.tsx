@@ -12,7 +12,7 @@ import {
   useColorScheme,
   View
 } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { ActivityIndicator, Card, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import BonSortieScreen from '../screens/bonSortieScreen';
@@ -87,7 +87,7 @@ const Plus = () => {
   ];
 
   const openModal = (type: ModalType) => {
-    Haptics.selectionAsync(); // Haptic feedback UX
+    Haptics.selectionAsync();
     setModalType(type);
     setShowModal(true);
   };
@@ -118,13 +118,13 @@ const Plus = () => {
       <View style={styles.header}>
         <View style={styles.profileContainer}>
           <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>
-            {(user?.nom || '')
-              .split(' ')
-              .slice(0, 2)
-              .map(word => word.charAt(0).toUpperCase())
-              .join('')}
-          </Text>
+            <Text style={styles.avatarText}>
+              {(user?.nom || '')
+                .split(' ')
+                .slice(0, 2)
+                .map(word => word.charAt(0).toUpperCase())
+                .join('')}
+            </Text>
         </View>
       <View>
     <Text variant="titleMedium">{user?.nom}</Text>
@@ -143,7 +143,9 @@ const Plus = () => {
 
       {/* Banner Image */}
       <View style={styles.imageCard}>
-        <Image source={Images.validateurIcon} style={styles.backImage} />
+        <Card>
+          <Image source={Images.validateurIcon} style={styles.backImage} />
+        </Card>
         <View style={styles.overlay}>
           <Text style={styles.overlayText}>Bienvenue 👋</Text>
         </View>
@@ -225,7 +227,6 @@ avatarText: {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-    paddingHorizontal: 20,
     paddingVertical: 10,
   },
   profileContainer: {
@@ -239,10 +240,10 @@ avatarText: {
     borderRadius: 21,
   },
   title: {
-    marginVertical: 15,
+    marginVertical: 10,
     fontWeight: 'bold',
-    paddingHorizontal: 20,
     color: '#111',
+    fontSize: 16
   },
   backImage: {
     width: '100%',
@@ -268,7 +269,6 @@ avatarText: {
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    paddingHorizontal: 20,
   },
   container: {
     flex: 1,

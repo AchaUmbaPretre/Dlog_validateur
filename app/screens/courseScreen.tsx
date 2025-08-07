@@ -4,8 +4,10 @@ import {
   getMotif,
   getServiceDemandeur,
   getVehiculeDispo,
+  postAffectationDemande,
 } from "@/services/charroiService";
 import { getClient } from "@/services/clientService";
+import { Feather } from "@expo/vector-icons";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
@@ -18,10 +20,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
-import { Button, Card, TextInput, Title } from "react-native-paper";
+import { Button, Card, Modal, Switch, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
+import BonSortieScreen from "./bonSortieScreen";
 
 // TYPES
 interface Vehicule {
@@ -54,7 +59,7 @@ interface Client {
 interface FormState {
   id_vehicule: number | null;
   id_chauffeur: number | null;
-  id_motif: number | null;
+  id_motif_demande: number | null;
   id_demandeur: number | null;
   id_client: number | null;
   id_destination: number | null;
@@ -62,21 +67,32 @@ interface FormState {
   commentaire: string;
 }
 
+type ModalType = 'Bande' | null;
+
+interface RenderModalContentProps {
+  modalType: ModalType;
+  affectationId: number | null;
+}
+
 const CourseScreen: React.FC = () => {
   const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
   const [loadingData, setLoadingData] = useState(false);
-
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<ModalType>(null);
   const [vehiculeList, setVehiculeList] = useState<Vehicule[]>([]);
   const [chauffeurList, setChauffeurList] = useState<Chauffeur[]>([]);
   const [motifList, setMotifList] = useState<Motif[]>([]);
   const [serviceList, setServiceList] = useState<Service[]>([]);
   const [destinationList, setDestinationList] = useState<Destination[]>([]);
   const [clientList, setClientList] = useState<Client[]>([]);
-
+  const [createBS, setCreateBS] = useState(true);
+  const [affectationId, setAffectationId] = useState<number | null>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [form, setForm] = useState<FormState>({
     id_vehicule: null,
     id_chauffeur: null,
-    id_motif: null,
+    id_motif_demande : null,
     id_demandeur: null,
     id_client: null,
     id_destination: null,
@@ -130,21 +146,23 @@ const CourseScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif || !form.id_demandeur ) {
+    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande  || !form.id_demandeur ) {
       Alert.alert("Champs requis", "Veuillez remplir tous les champs obligatoires (*)");
       return;
     }
 
     try {
       setLoadingData(true);
-      console.log(form)
-      // Appel API désactivé temporairement
-      // await postSortieVehiculeExceptionnel({ ...form, id_agent: userId });
+      const response = await postAffectationDemande({ ...form, date_prevue: datePrevue, date_retour: dateRetour, user_cr: userId });
       Alert.alert("Succès", "Course enregistrée avec succès !");
+
+      const newId = Number(response.data?.id_affectation);
+      setAffectationId(newId);
+
       setForm({
         id_vehicule: null,
         id_chauffeur: null,
-        id_motif: null,
+        id_motif_demande: null,
         id_demandeur: null,
         id_client: null,
         id_destination: null,
@@ -154,6 +172,16 @@ const CourseScreen: React.FC = () => {
       setDatePrevue(null);
       setDateRetour(null);
       fetchDatas();
+
+/*       if (createBS && newId) {
+        setAffectationId(newId);
+
+        setTimeout(() => {
+          setModalType('Bande');
+          setShowModal(true);
+        }, 100);
+      } */
+
     } catch (error) {
       Alert.alert("Erreur", "Impossible d'enregistrer le retour.");
     } finally {
@@ -244,69 +272,104 @@ const CourseScreen: React.FC = () => {
     </View>
   );
 
+  const onToggleSwitch = () => setCreateBS(!createBS);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalType(null);
+  };
+
+const renderModalContent = (): JSX.Element | null => {
+  switch (modalType) {
+    case 'Bande':
+      return affectationId !== null ? <BonSortieScreen affectationId={affectationId} /> : null;
+    default:
+      return null;
+  }
+};
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
+    <>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.inner}>
+            <Title style={styles.title}>Créer une course</Title>
+
+            {loadingData ? (
+              <ActivityIndicator size="large" color="#007AFF" />
+            ) : (
+              <Card style={styles.card}>
+                <Card.Content>
+                  {renderDateTimePicker("Date & heure de départ prévue", datePrevue, setDatePrevue)}
+                  {renderDateTimePicker("Date & heure de retour prévue", dateRetour, setDateRetour)}
+
+                  {renderPicker("Véhicule *", "id_vehicule", vehiculeList, "immatriculation", "id_vehicule")}
+                  {renderPicker("Chauffeur *", "id_chauffeur", chauffeurList, "nom", "id_chauffeur")}
+                  {renderPicker("Motif *", "id_motif_demande", motifList, "nom_motif_demande", "id_motif_demande")}
+                  {renderPicker("Service Demandeur *", "id_demandeur", serviceList, "nom_service", "id_service_demandeur")}
+                  {renderPicker("Client", "id_client", clientList, "nom", "id_client")}
+                  {renderPicker("Destination", "id_destination", destinationList, "nom_destination", "id_destination")}
+
+                  <Text style={styles.label}>Personnes à bord</Text>
+                  <TextInput
+                    mode="outlined"
+                    placeholder="Saisir les noms"
+                    value={form.personne_bord}
+                    onChangeText={(val) => handleChange("personne_bord", val)}
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>Commentaire *</Text>
+                  <TextInput
+                    mode="outlined"
+                    placeholder="Commenter..."
+                    value={form.commentaire}
+                    onChangeText={(val) => handleChange("commentaire", val)}
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>Créer bon de BS</Text>
+                  <Switch style={styles.input} value={createBS} onValueChange={onToggleSwitch} />
+
+                  <Button
+                    mode="contained"
+                    onPress={handleSubmit}
+                    loading={loadingData}
+                    disabled={loadingData}
+                    style={styles.button}
+                  >
+                    Soumettre
+                  </Button>
+                </Card.Content>
+              </Card>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showModal}
+        onRequestClose={closeModal}
       >
-        <View style={styles.inner}>
-          <Title style={styles.title}>Créer un bon de sortie</Title>
-
-          {loadingData ? (
-            <ActivityIndicator size="large" color="#007AFF" />
-          ) : (
-            <Card style={styles.card}>
-              <Card.Content>
-                {renderDateTimePicker("Date & heure de départ prévue", datePrevue, setDatePrevue)}
-                {renderDateTimePicker("Date & heure de retour prévue", dateRetour, setDateRetour)}
-
-                {renderPicker("Véhicule *", "id_vehicule", vehiculeList, "immatriculation", "id_vehicule")}
-                {renderPicker("Chauffeur *", "id_chauffeur", chauffeurList, "nom", "id_chauffeur")}
-                {renderPicker("Motif *", "id_motif", motifList, "nom_motif_demande", "id_motif_demande")}
-                {renderPicker("Service Demandeur *", "id_demandeur", serviceList, "nom_service", "id_service_demandeur")}
-                {renderPicker("Client", "id_client", clientList, "nom", "id_client")}
-                {renderPicker("Destination", "id_destination", destinationList, "nom_destination", "id_destination")}
-
-                <Text style={styles.label}>Personnes à bord</Text>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Saisir les noms"
-                  value={form.personne_bord}
-                  onChangeText={(val) => handleChange("personne_bord", val)}
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>Commentaire *</Text>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Commenter..."
-                  value={form.commentaire}
-                  onChangeText={(val) => handleChange("commentaire", val)}
-                  style={styles.input}
-                />
-
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={loadingData}
-                  disabled={loadingData}
-                  style={styles.button}
-                >
-                  Soumettre
-                </Button>
-              </Card.Content>
-            </Card>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={closeModal}>
+              <Feather name="x" size={28} color={isDark ? '#fff' : '#000'} />
+            </TouchableOpacity>
+          </View>
+          <View style={{ flex: 1 }}>{renderModalContent()}</View>
+        </SafeAreaView>
+      </Modal>
+    </>
   );
 };
 
 export default CourseScreen;
-
 
 const styles = StyleSheet.create({
   backButton: {
@@ -365,5 +428,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 8,
     paddingVertical: 6,
+  },
+    modalHeader: {
+    alignItems: 'flex-end',
+    padding: 15,
   },
 });

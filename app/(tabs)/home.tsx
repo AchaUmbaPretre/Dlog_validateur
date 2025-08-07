@@ -1,6 +1,7 @@
 import { Images } from '@/assets/images';
 import { logout } from '@/redux/authSlice';
 import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiService';
+import { BonSortieCard } from '@/utils/BonSortieCard';
 import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,46 +17,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { ActivityIndicator, Button, Card, Snackbar, Text } from 'react-native-paper';
+import { ActivityIndicator, Card, Snackbar, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-
-const BonSortieCard = ({
-  data,
-  onFinish,
-}: {
-  data: BonSortie & {
-  dateHeurePrevue: string;
-  dateHeureRetour: string;
-};
-  onFinish: (bon: BonSortie) => void;
-}) => {
-
-  return (
-    <Card style={styles.card}>
-      <Card.Content style={{ gap: 10 }}>
-        <Text>🚚 Destination : <Text style={styles.bold}>{data.nom_destination}</Text></Text>
-        <Text>👨‍✈️ Chauffeur : <Text style={styles.bold}>{data.nom_chauffeur}</Text></Text>
-        <Text>🚗 Marque : <Text style={styles.bold}>{data.nom_marque}</Text></Text>
-        <Text>🚗 Plaque : <Text style={styles.bold}>{data.immatriculation}</Text></Text>
-        <Text>🛻 Type de véhicule : <Text style={styles.bold}>{data.nom_cat}</Text></Text>
-        <Text>🕒 Date et heure prévue : <Text style={styles.bold}>{data.dateHeurePrevue}</Text></Text>
-        <Text>🕕 Date et heure retour : <Text style={styles.bold}>{data.dateHeureRetour}</Text></Text>
-        <Text>👨‍✈️ Crée par : <Text style={styles.bold}>{data.user_cr}</Text></Text>
-
-      </Card.Content>
-      <Card.Actions>
-          <Button
-            buttonColor="#007BFF"
-            textColor="#ffffff"
-            mode="contained"
-            onPress={() => onFinish(data)}
-          >
-            Valider
-          </Button>
-      </Card.Actions>
-    </Card>
-  );
-};
 
 
 interface BonSortie {
@@ -309,11 +272,11 @@ const styles = StyleSheet.create({
   title: {
     marginVertical: 20,
     fontWeight: 'bold',
+    fontSize: 18
   },
   imageCard: {
     borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: 20,
   },
   backImage: {
     width: '100%',
@@ -331,4 +294,22 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: '600',
   },
+  cardTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#333',
+},
+cardSubtitle: {
+  fontSize: 14,
+  color: '#888',
+},
+row: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginVertical: 4,
+},
+value: {
+  fontWeight: '600',
+  color: '#333',
+},
 });

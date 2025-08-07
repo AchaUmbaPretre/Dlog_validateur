@@ -1,9 +1,10 @@
 import {
-    getChauffeur,
-    getDestination,
-    getMotif,
-    getServiceDemandeur,
-    getVehiculeDispo,
+  getChauffeur,
+  getDestination,
+  getMotif,
+  getServiceDemandeur,
+  getVehiculeDispo,
+  postBandeSortie,
 } from "@/services/charroiService";
 import { getClient } from "@/services/clientService";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -11,14 +12,14 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { Button, Card, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
@@ -54,7 +55,7 @@ interface Client {
 interface FormState {
   id_vehicule: number | null;
   id_chauffeur: number | null;
-  id_motif: number | null;
+  id_motif_demande: number | null;
   id_demandeur: number | null;
   id_client: number | null;
   id_destination: number | null;
@@ -62,7 +63,11 @@ interface FormState {
   commentaire: string;
 }
 
-const BonSortieScreen: React.FC = () => {
+type Props = {
+  affectationId: number;
+};
+
+const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
   const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
   const [loadingData, setLoadingData] = useState(false);
 
@@ -76,7 +81,7 @@ const BonSortieScreen: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     id_vehicule: null,
     id_chauffeur: null,
-    id_motif: null,
+    id_motif_demande: null,
     id_demandeur: null,
     id_client: null,
     id_destination: null,
@@ -130,21 +135,19 @@ const BonSortieScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif || !form.id_demandeur ) {
+    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande || !form.id_demandeur ) {
       Alert.alert("Champs requis", "Veuillez remplir tous les champs obligatoires (*)");
       return;
     }
 
     try {
       setLoadingData(true);
-      console.log(form)
-      // Appel API désactivé temporairement
-      // await postSortieVehiculeExceptionnel({ ...form, id_agent: userId });
-      Alert.alert("Succès", "Course enregistrée avec succès !");
+      await postBandeSortie({ ...form,  id_affectation_demande : affectationId, date_prevue: datePrevue, date_retour: dateRetour, user_cr: userId });
+      Alert.alert("Succès", "Le bon de sortie est enregistré avec succès !");
       setForm({
         id_vehicule: null,
         id_chauffeur: null,
-        id_motif: null,
+        id_motif_demande: null,
         id_demandeur: null,
         id_client: null,
         id_destination: null,
@@ -264,7 +267,7 @@ const BonSortieScreen: React.FC = () => {
 
                 {renderPicker("Véhicule *", "id_vehicule", vehiculeList, "immatriculation", "id_vehicule")}
                 {renderPicker("Chauffeur *", "id_chauffeur", chauffeurList, "nom", "id_chauffeur")}
-                {renderPicker("Motif *", "id_motif", motifList, "nom_motif_demande", "id_motif_demande")}
+                {renderPicker("Motif *", "id_motif_demande", motifList, "nom_motif_demande", "id_motif_demande")}
                 {renderPicker("Service Demandeur *", "id_demandeur", serviceList, "nom_service", "id_service_demandeur")}
                 {renderPicker("Client", "id_client", clientList, "nom", "id_client")}
                 {renderPicker("Destination", "id_destination", destinationList, "nom_destination", "id_destination")}
