@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -13,9 +14,9 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
-import { Button, Card, Modal, Switch, TextInput, Title } from "react-native-paper";
+import { Button, Card, Surface, Switch, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
 
 import { postAffectationDemande } from "@/services/charroiService";
@@ -203,8 +204,11 @@ const CourseScreen: React.FC = () => {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.inner}>
-            <Title style={styles.title}>Créer une course</Title>
-
+            <Surface style={styles.titleContainer} elevation={4}>
+              <View style={styles.titleBar} />
+              <Title style={styles.titleText}>Créer une course</Title>
+              <View style={styles.titleBar} />
+            </Surface>
             {loading ? (
               <ActivityIndicator size="large" color="#007AFF" />
             ) : (
@@ -280,7 +284,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f9fc",
+    backgroundColor: "#F0F2F5"
   },
   scrollContainer: {
     flex: 1,
@@ -289,21 +293,44 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   inner: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
+  titleContainer: {
+  marginTop: 20,
+  marginBottom: 24,
+  paddingVertical: 10,
+  backgroundColor: "#fff",
+  borderRadius: 16,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.1,
+  shadowRadius: 12,
+  elevation: 6,
+  },
+  titleBar: {
+    width: 4,
+    height: "100%",
+    backgroundColor: "#2563EB",
+    borderRadius: 4,
+  },
+  titleText: {
+    flex: 1,
     textAlign: "center",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1E293B",
+    letterSpacing: 0.5,
   },
   label: {
-    marginTop: 12,
-    marginBottom: 4,
-    fontSize: 16,
+    marginTop: 16,
+    marginBottom: 6,
+    fontSize: 15,
     fontWeight: "600",
-    color: "#555",
+    color: "#374151", // gris moyen
   },
   field: {
     marginBottom: 12,
@@ -319,10 +346,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   card: {
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderRadius: 16,
     backgroundColor: "#fff",
-    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    marginBottom: 16,
   },
   button: {
     marginTop: 16,

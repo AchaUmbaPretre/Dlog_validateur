@@ -7,6 +7,7 @@ import {
   postBandeSortie,
 } from "@/services/charroiService";
 import { getClient } from "@/services/clientService";
+import { Chauffeur, Client, Destination, FormState, Motif, Service, Vehicule } from "@/types";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
@@ -23,45 +24,6 @@ import {
 } from "react-native";
 import { Button, Card, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
-
-// TYPES
-interface Vehicule {
-  id_vehicule: number;
-  immatriculation: string;
-  nom_marque: string;
-  modele: string;
-}
-interface Chauffeur {
-  id_chauffeur: number;
-  nom: string;
-  postnom: string;
-}
-interface Motif {
-  id_motif_demande: number;
-  nom_motif_demande: string;
-}
-interface Service {
-  id_service_demandeur: number;
-  nom_service: string;
-}
-interface Destination {
-  id_destination: number;
-  nom_destination: string;
-}
-interface Client {
-  id_client: number;
-  nom: string;
-}
-interface FormState {
-  id_vehicule: number | null;
-  id_chauffeur: number | null;
-  id_motif_demande: number | null;
-  id_demandeur: number | null;
-  id_client: number | null;
-  id_destination: number | null;
-  personne_bord: string;
-  commentaire: string;
-}
 
 type Props = {
   affectationId: number;
@@ -285,7 +247,7 @@ const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
                 <TextInput
                   mode="outlined"
                   placeholder="Commenter..."
-                  value={form.autorise_par}
+                  value={form.commentaire}
                   onChangeText={(val) => handleChange("commentaire", val)}
                   style={styles.input}
                 />
