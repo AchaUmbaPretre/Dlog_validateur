@@ -20,7 +20,7 @@ import CourseScreen from '../screens/courseScreen';
 import ListBonScreen from '../screens/listBonScreen';
 import ListCourseScreen from '../screens/listCourseScreen';
 
-type ModalType = 'course' | 'listCourse' | 'bon' | 'listBon' | null;
+type ModalType = 'course' | 'listCourse' | 'bon' | 'listBon' | 'bons' | null;
 
 const Plus = () => {
   const [loading, setLoading] = useState(false);
@@ -103,7 +103,7 @@ const Plus = () => {
         return <CourseScreen />;
       case 'listCourse':
         return <ListCourseScreen />;
-      case 'bon':
+      case 'bons':
         return <BonSortieScreen />;
       case 'listBon':
         return <ListBonScreen />;
@@ -235,8 +235,8 @@ avatarText: {
     gap: 10,
   },
   avatar: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: 21,
   },
   title: {

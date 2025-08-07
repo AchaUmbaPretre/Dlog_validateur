@@ -101,7 +101,7 @@ const ListCourseScreen = () => {
       <View style={styles.headerContainer}>
         <View style={styles.blueBar} />
         <Surface style={styles.header} elevation={4}>
-          <Text style={styles.headerTitle}>📋 Liste des Courses</Text>
+          <Text style={styles.headerTitle}>📋 LISTE DES COURSES</Text>
         </Surface>
         <View style={styles.blueBar} />
       </View>

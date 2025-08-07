@@ -272,8 +272,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   avatar: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: 21,
   },
   avatarCircle: {
