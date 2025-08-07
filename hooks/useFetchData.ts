@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
 import {
   getChauffeur,
   getDestination,
   getMotif,
   getServiceDemandeur,
+  getVehicule,
   getVehiculeDispo,
 } from "@/services/charroiService";
 import { getClient } from "@/services/clientService";
+import { useEffect, useState } from "react";
 
 import { Chauffeur, Client, Destination, Motif, Service, Vehicule } from "@/types";
 import { Alert } from "react-native";
@@ -19,6 +20,7 @@ export function useFetchData() {
   const [serviceList, setServiceList] = useState<Service[]>([]);
   const [destinationList, setDestinationList] = useState<Destination[]>([]);
   const [clientList, setClientList] = useState<Client[]>([]);
+  const [vehicule, setVehicule] = useState<Vehicule[]>([]);
 
   const fetchDatas = async () => {
     try {
@@ -30,6 +32,7 @@ export function useFetchData() {
         motifData,
         destinationData,
         clientData,
+        vehiculeDataV,
       ] = await Promise.all([
         getVehiculeDispo(),
         getChauffeur(),
@@ -37,6 +40,7 @@ export function useFetchData() {
         getMotif(),
         getDestination(),
         getClient(),
+        getVehicule()
       ]);
       setVehiculeList(vehiculeData.data);
       setChauffeurList(chauffeurData.data?.data ?? []);
@@ -44,6 +48,7 @@ export function useFetchData() {
       setMotifList(motifData.data);
       setDestinationList(destinationData.data);
       setClientList(clientData.data);
+      setVehicule(vehiculeDataV.data.data)
     } catch (err) {
       Alert.alert("Erreur", "Échec de chargement des données.");
     } finally {
@@ -64,5 +69,6 @@ export function useFetchData() {
     destinationList,
     clientList,
     fetchDatas,
+    vehicule
   };
 }

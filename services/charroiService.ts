@@ -24,7 +24,7 @@ export const getChauffeur = () => fetchData('chauffeur');
 export const getServiceDemandeur = () => fetchData('serviceDemadeur');
 export const getMotif = () => fetchData('motif');
 export const getDestination = () => fetchData('destination');
-
+export const getVehicule = () => fetchData('vehicule');
 export const getAffectationDemandeOne = async (
   id: number
 ): Promise<AxiosResponse<any>> => {

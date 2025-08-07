@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -20,6 +21,7 @@ import { useFetchData } from "@/hooks/useFetchData";
 import { RootState } from "@/redux/store";
 import { getAffectationDemandeOne, postBandeSortie } from "@/services/charroiService";
 import { FormState } from "@/types";
+import { AntDesign } from "@expo/vector-icons";
 
 interface ShowPickerState {
   label: string;
@@ -28,7 +30,7 @@ interface ShowPickerState {
 }
 
 const pickerFields = [
-  { label: "Véhicule *", key: "id_vehicule", dataKey: "vehiculeList", labelProp: "immatriculation", valueProp: "id_vehicule" },
+  { label: "Véhicule *", key: "id_vehicule", dataKey: "vehicule", labelProp: "immatriculation", valueProp: "id_vehicule" },
   { label: "Chauffeur *", key: "id_chauffeur", dataKey: "chauffeurList", labelProp: "nom", valueProp: "id_chauffeur" },
   { label: "Motif *", key: "id_motif_demande", dataKey: "motifList", labelProp: "nom_motif_demande", valueProp: "id_motif_demande" },
   { label: "Service Demandeur *", key: "id_demandeur", dataKey: "serviceList", labelProp: "nom_service", valueProp: "id_service_demandeur" },
@@ -40,18 +42,17 @@ const BonSortieScreen: React.FC = () => {
   const userId = useSelector((state: RootState) => state.auth?.currentUser?.id_utilisateur);
   const {
     loading,
-    vehiculeList,
     chauffeurList,
     motifList,
     serviceList,
     destinationList,
     clientList,
     fetchDatas,
+    vehicule
   } = useFetchData();
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-
   const [form, setForm] = useState<FormState>({
     id_vehicule: null,
     id_chauffeur: null,
@@ -79,26 +80,29 @@ const BonSortieScreen: React.FC = () => {
 const fetchData = async () => {
   try {
     const { data } = await getAffectationDemandeOne(affectationIdNumber);
-    console.log(data)
-    if (data) {
+
+    const item = data[0];
+
+    if (item) {
       setForm({
-        id_vehicule: data.id_vehicule ?? null,
-        id_chauffeur: data.id_chauffeur ?? null,
-        id_motif_demande: data.id_motif_demande ?? null,
-        id_demandeur: data.id_demandeur ?? null,
-        id_client: data.id_client ?? null,
-        id_destination: data.id_destination ?? null,
-        personne_bord: data.personne_bord || '',
-        commentaire: data.commentaire || '',
+        id_vehicule: item.id_vehicule ?? null,
+        id_chauffeur: item.id_chauffeur ?? null,
+        id_motif_demande: item.id_motif_demande ?? null,
+        id_demandeur: item.id_demandeur ?? null,
+        id_client: item.id_client ?? null,
+        id_destination: item.id_destination ?? null,
+        personne_bord: item.personne_bord || '',
+        commentaire: item.commentaire || '',
       });
 
-      setDatePrevue(data.date_prevue ? new Date(data.date_prevue) : null);
-      setDateRetour(data.date_retour ? new Date(data.date_retour) : null);
+      setDatePrevue(item.date_prevue ? new Date(item.date_prevue) : null);
+      setDateRetour(item.date_retour ? new Date(item.date_retour) : null);
     }
   } catch (error) {
     console.log("Erreur fetch affectation:", error);
   }
 };
+
 
 
       useEffect(()=> {
@@ -112,7 +116,7 @@ const fetchData = async () => {
     }
 
     try {
-       await postBandeSortie({ ...form, date_prevue: datePrevue, date_retour: dateRetour,  id_affectation_demande : affectationId, user_cr: userId });
+       await postBandeSortie({ ...form, date_prevue: datePrevue, date_retour: dateRetour,  id_affectation_demande : affectationId, id_societe: 1, user_cr: userId });
       Alert.alert("Succès", "Course enregistrée avec succès !");
 
       setForm({
@@ -127,33 +131,34 @@ const fetchData = async () => {
       });
       setDatePrevue(null);
       setDateRetour(null);
-
       fetchDatas();
-
+      router.replace('/(tabs)/plus');
     } catch (error) {
       Alert.alert("Erreur", "Impossible d'enregistrer le bon.");
     }
   };
 
-  const renderPicker = (
-    label: string,
-    key: keyof FormState,
-    data: any[],
-    labelProp: string,
-    valueProp: string
-  ) => (
-    <View style={styles.field} key={key}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker selectedValue={form[key]} onValueChange={(val) => handleChange(key, val)}>
-          <Picker.Item label={`-- Sélectionner ${label.toLowerCase()} --`} value={null} />
-          {data.map((item, index) => (
+const renderPicker = (
+  label: string,
+  key: keyof FormState,
+  data: any[] | undefined,
+  labelProp: string,
+  valueProp: string
+) => (
+  <View style={styles.field} key={key}>
+    <Text style={styles.label}>{label}</Text>
+    <View style={styles.pickerWrapper}>
+      <Picker selectedValue={form[key]} onValueChange={(val) => handleChange(key, val)}>
+        <Picker.Item label={`-- Sélectionner ${label.toLowerCase()} --`} value={null} />
+        {Array.isArray(data) &&
+          data.map((item, index) => (
             <Picker.Item key={`${key}-${item[valueProp] ?? index}`} label={item[labelProp]} value={item[valueProp]} />
           ))}
-        </Picker>
-      </View>
+      </Picker>
     </View>
-  );
+  </View>
+);
+
 
   const openPicker = (label: string, value: Date | null, onChange: (date: Date) => void) => {
     const initialDate = value || new Date();
@@ -200,6 +205,9 @@ const fetchData = async () => {
   return (
     <>
       <SafeAreaView style={styles.safeArea}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <AntDesign name="arrowleft" size={24} color="#007AFF" />
+        </Pressable>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.inner}>
             <Surface style={styles.titleContainer} elevation={4}>
@@ -219,7 +227,7 @@ const fetchData = async () => {
 
                   {pickerFields.map(({ label, key, dataKey, labelProp, valueProp }) =>
                     renderPicker(label, key, {
-                      vehiculeList,
+                      vehicule,
                       chauffeurList,
                       motifList,
                       serviceList,
