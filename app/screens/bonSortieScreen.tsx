@@ -1,17 +1,7 @@
-import {
-  getChauffeur,
-  getDestination,
-  getMotif,
-  getServiceDemandeur,
-  getVehiculeDispo,
-  postBandeSortie,
-} from "@/services/charroiService";
-import { getClient } from "@/services/clientService";
-import { Chauffeur, Client, Destination, FormState, Motif, Service, Vehicule } from "@/types";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,25 +10,48 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  useColorScheme,
+  View
 } from "react-native";
-import { Button, Card, TextInput, Title } from "react-native-paper";
+import { Button, Card, Surface, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
 
-type Props = {
-  affectationId: number;
-};
+import { useFetchData } from "@/hooks/useFetchData";
+import { RootState } from "@/redux/store";
+import { postAffectationDemande } from "@/services/charroiService";
+import { FormState } from "@/types";
 
-const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
-  const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
-  const [loadingData, setLoadingData] = useState(false);
+interface ShowPickerState {
+  label: string;
+  value: Date | null;
+  onChange: (date: Date) => void;
+}
 
-  const [vehiculeList, setVehiculeList] = useState<Vehicule[]>([]);
-  const [chauffeurList, setChauffeurList] = useState<Chauffeur[]>([]);
-  const [motifList, setMotifList] = useState<Motif[]>([]);
-  const [serviceList, setServiceList] = useState<Service[]>([]);
-  const [destinationList, setDestinationList] = useState<Destination[]>([]);
-  const [clientList, setClientList] = useState<Client[]>([]);
+const pickerFields = [
+  { label: "Véhicule *", key: "id_vehicule", dataKey: "vehiculeList", labelProp: "immatriculation", valueProp: "id_vehicule" },
+  { label: "Chauffeur *", key: "id_chauffeur", dataKey: "chauffeurList", labelProp: "nom", valueProp: "id_chauffeur" },
+  { label: "Motif *", key: "id_motif_demande", dataKey: "motifList", labelProp: "nom_motif_demande", valueProp: "id_motif_demande" },
+  { label: "Service Demandeur *", key: "id_demandeur", dataKey: "serviceList", labelProp: "nom_service", valueProp: "id_service_demandeur" },
+  { label: "Client", key: "id_client", dataKey: "clientList", labelProp: "nom", valueProp: "id_client" },
+  { label: "Destination", key: "id_destination", dataKey: "destinationList", labelProp: "nom_destination", valueProp: "id_destination" },
+];
+
+const BonSortieScreen: React.FC = () => {
+  const userId = useSelector((state: RootState) => state.auth?.currentUser?.id_utilisateur);
+  const {
+    loading,
+    vehiculeList,
+    chauffeurList,
+    motifList,
+    serviceList,
+    destinationList,
+    clientList,
+    fetchDatas,
+  } = useFetchData();
+
+  const [affectationId, setAffectationId] = useState<number | null>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   const [form, setForm] = useState<FormState>({
     id_vehicule: null,
@@ -53,59 +66,27 @@ const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
 
   const [datePrevue, setDatePrevue] = useState<Date | null>(null);
   const [dateRetour, setDateRetour] = useState<Date | null>(null);
-  const [showPicker, setShowPicker] = useState<any>(null); // facultatif si tu veux gérer les pickers iOS
+  const [showPicker, setShowPicker] = useState<ShowPickerState | null>(null);
 
   const router = useRouter();
-
-  const fetchDatas = async () => {
-    try {
-      setLoadingData(true);
-      const [
-        vehiculeData,
-        chauffeurData,
-        serviceData,
-        motifData,
-        destinationData,
-        clientData,
-      ] = await Promise.all([
-        getVehiculeDispo(),
-        getChauffeur(),
-        getServiceDemandeur(),
-        getMotif(),
-        getDestination(),
-        getClient(),
-      ]);
-      setVehiculeList(vehiculeData.data);
-      setChauffeurList(chauffeurData.data?.data ?? []);
-      setServiceList(serviceData.data);
-      setMotifList(motifData.data);
-      setDestinationList(destinationData.data);
-      setClientList(clientData.data);
-    } catch (err) {
-      Alert.alert("Erreur", "Échec de chargement des données.");
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDatas();
-  }, []);
 
   const handleChange = (name: keyof FormState, value: any) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande || !form.id_demandeur ) {
+    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande || !form.id_demandeur) {
       Alert.alert("Champs requis", "Veuillez remplir tous les champs obligatoires (*)");
       return;
     }
 
     try {
-      setLoadingData(true);
-      await postBandeSortie({ ...form,  id_affectation_demande : affectationId, date_prevue: datePrevue, date_retour: dateRetour, user_cr: userId });
-      Alert.alert("Succès", "Le bon de sortie est enregistré avec succès !");
+      const response = await postAffectationDemande({ ...form, date_prevue: datePrevue, date_retour: dateRetour, user_cr: userId });
+      Alert.alert("Succès", "Course enregistrée avec succès !");
+
+      const newId = Number(response.data?.id_affectation);
+      setAffectationId(newId);
+
       setForm({
         id_vehicule: null,
         id_chauffeur: null,
@@ -118,11 +99,15 @@ const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
       });
       setDatePrevue(null);
       setDateRetour(null);
+
       fetchDatas();
+
+      // if (createBS && newId) {
+      //   setModalType("Bande");
+      //   setShowModal(true);
+      // }
     } catch (error) {
       Alert.alert("Erreur", "Impossible d'enregistrer le retour.");
-    } finally {
-      setLoadingData(false);
     }
   };
 
@@ -133,46 +118,35 @@ const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
     labelProp: string,
     valueProp: string
   ) => (
-    <View style={styles.field}>
+    <View style={styles.field} key={key}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={form[key]}
-          onValueChange={(val) => handleChange(key, val)}
-        >
+        <Picker selectedValue={form[key]} onValueChange={(val) => handleChange(key, val)}>
           <Picker.Item label={`-- Sélectionner ${label.toLowerCase()} --`} value={null} />
           {data.map((item, index) => (
-            <Picker.Item
-              key={`${key}-${item[valueProp] ?? index}`}
-              label={item[labelProp]}
-              value={item[valueProp]}
-            />
+            <Picker.Item key={`${key}-${item[valueProp] ?? index}`} label={item[labelProp]} value={item[valueProp]} />
           ))}
         </Picker>
       </View>
     </View>
   );
 
-  const openPicker = (
-    label: string,
-    value: Date | null,
-    onChange: (date: Date) => void
-  ) => {
+  const openPicker = (label: string, value: Date | null, onChange: (date: Date) => void) => {
     const initialDate = value || new Date();
 
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       DateTimePickerAndroid.open({
         value: initialDate,
-        mode: 'date',
+        mode: "date",
         is24Hour: true,
-        display: 'default',
+        display: "default",
         onChange: (_event, selectedDate) => {
           if (selectedDate) {
             DateTimePickerAndroid.open({
               value: selectedDate,
-              mode: 'time',
+              mode: "time",
               is24Hour: true,
-              display: 'default',
+              display: "default",
               onChange: (_evt, selectedTime) => {
                 if (selectedTime) {
                   const finalDate = new Date(selectedDate);
@@ -186,103 +160,93 @@ const BonSortieScreen: React.FC<Props> = ({affectationId}) => {
         },
       });
     } else {
-      setShowPicker({ label, value, onChange }); // à implémenter si iOS
+      setShowPicker({ label, value, onChange });
     }
   };
 
-  const renderDateTimePicker = (
-    label: string,
-    value: Date | null,
-    onChange: (date: Date) => void
-  ) => (
-    <View style={styles.field}>
+  const renderDateTimePicker = (label: string, value: Date | null, onChange: (date: Date) => void) => (
+    <View style={styles.field} key={label}>
       <Text style={styles.label}>{label}</Text>
-      <Button
-        mode="outlined"
-        onPress={() => openPicker(label, value, onChange)}
-        style={{ borderRadius: 0, borderColor: '#ccc' }}
-      >
-        <Text style={{ color: '#555' }}>
-          {value ? value.toLocaleString() : "Choisir la date et l'heure"}
-        </Text>
+      <Button mode="outlined" onPress={() => openPicker(label, value, onChange)} style={{ borderRadius: 0, borderColor: "#ccc" }}>
+        <Text style={{ color: "#555" }}>{value ? value.toLocaleString() : "Choisir la date et l'heure"}</Text>
       </Button>
     </View>
   );
-
+  
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.inner}>
-          <Title style={styles.title}>Créer un bon de sortie</Title>
+    <>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <View style={styles.inner}>
+            <Surface style={styles.titleContainer} elevation={4}>
+              <View style={styles.titleBar} />
+              <Title style={styles.titleText}>Créer un bon de sortie</Title>
+              <View style={styles.titleBar} />
+            </Surface>
+            {loading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#007bff" />
+            </View>
+            ) : (
+              <Card style={styles.card}>
+                <Card.Content>
+                  {renderDateTimePicker("Date & heure de départ prévue", datePrevue, setDatePrevue)}
+                  {renderDateTimePicker("Date & heure de retour prévue", dateRetour, setDateRetour)}
 
-          {loadingData ? (
-            <ActivityIndicator size="large" color="#007AFF" />
-          ) : (
-            <Card style={styles.card}>
-              <Card.Content>
-                {renderDateTimePicker("Date & heure de départ prévue", datePrevue, setDatePrevue)}
-                {renderDateTimePicker("Date & heure de retour prévue", dateRetour, setDateRetour)}
+                  {pickerFields.map(({ label, key, dataKey, labelProp, valueProp }) =>
+                    renderPicker(label, key, {
+                      vehiculeList,
+                      chauffeurList,
+                      motifList,
+                      serviceList,
+                      destinationList,
+                      clientList,
+                    }[dataKey], labelProp, valueProp)
+                  )}
 
-                {renderPicker("Véhicule *", "id_vehicule", vehiculeList, "immatriculation", "id_vehicule")}
-                {renderPicker("Chauffeur *", "id_chauffeur", chauffeurList, "nom", "id_chauffeur")}
-                {renderPicker("Motif *", "id_motif_demande", motifList, "nom_motif_demande", "id_motif_demande")}
-                {renderPicker("Service Demandeur *", "id_demandeur", serviceList, "nom_service", "id_service_demandeur")}
-                {renderPicker("Client", "id_client", clientList, "nom", "id_client")}
-                {renderPicker("Destination", "id_destination", destinationList, "nom_destination", "id_destination")}
+                  <Text style={styles.label}>Personnes à bord</Text>
+                  <TextInput
+                    mode="outlined"
+                    placeholder="Saisir les noms"
+                    value={form.personne_bord}
+                    onChangeText={(val) => handleChange("personne_bord", val)}
+                    style={styles.input}
+                  />
 
-                <Text style={styles.label}>Personnes à bord</Text>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Saisir les noms"
-                  value={form.personne_bord}
-                  onChangeText={(val) => handleChange("personne_bord", val)}
-                  style={styles.input}
-                />
+                  <Text style={styles.label}>Commentaire *</Text>
+                  <TextInput
+                    mode="outlined"
+                    placeholder="Commenter..."
+                    value={form.commentaire}
+                    onChangeText={(val) => handleChange("commentaire", val)}
+                    style={styles.input}
+                  />
 
-                <Text style={styles.label}>Commentaire *</Text>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Commenter..."
-                  value={form.commentaire}
-                  onChangeText={(val) => handleChange("commentaire", val)}
-                  style={styles.input}
-                />
-
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={loadingData}
-                  disabled={loadingData}
-                  style={styles.button}
-                >
-                  Soumettre
-                </Button>
-              </Card.Content>
-            </Card>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+                  <Button mode="contained" onPress={handleSubmit} loading={loading} disabled={loading} style={styles.button}>
+                    Soumettre
+                  </Button>
+                </Card.Content>
+              </Card>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
 export default BonSortieScreen;
 
-
 const styles = StyleSheet.create({
   backButton: {
-  marginBottom: 16,
-  marginTop: 10,
-  paddingLeft: 4,
-  alignSelf: "flex-start",
-},
+    marginBottom: 16,
+    marginTop: 10,
+    paddingLeft: 4,
+    alignSelf: "flex-start",
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f9fc",
+    backgroundColor: "#F0F2F5"
   },
   scrollContainer: {
     flex: 1,
@@ -291,21 +255,44 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   inner: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
+  titleContainer: {
+  marginTop: 20,
+  marginBottom: 24,
+  paddingVertical: 10,
+  backgroundColor: "#fff",
+  borderRadius: 16,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.1,
+  shadowRadius: 12,
+  elevation: 6,
+  },
+  titleBar: {
+    width: 4,
+    height: "100%",
+    backgroundColor: "#2563EB",
+    borderRadius: 4,
+  },
+  titleText: {
+    flex: 1,
     textAlign: "center",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1E293B",
+    letterSpacing: 0.5,
   },
   label: {
-    marginTop: 12,
-    marginBottom: 4,
-    fontSize: 16,
+    marginTop: 16,
+    marginBottom: 6,
+    fontSize: 15,
     fontWeight: "600",
-    color: "#555",
+    color: "#374151", // gris moyen
   },
   field: {
     marginBottom: 12,
@@ -321,14 +308,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   card: {
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderRadius: 16,
     backgroundColor: "#fff",
-    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    marginBottom: 16,
   },
   button: {
     marginTop: 16,
     borderRadius: 8,
     paddingVertical: 6,
+  },
+  modalHeader: {
+    alignItems: "flex-end",
+    padding: 15,
   },
 });

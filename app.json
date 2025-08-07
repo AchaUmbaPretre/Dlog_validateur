@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "GTM - Validateur",
-    "slug": "gtm-validateur",
+    "name": "DLOG - Validateur",
+    "slug": "dlog-validateur",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/gtm.png",
@@ -12,10 +12,7 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/gtm.png",
-        "backgroundColor": "#ffffff"
-      },
+      "icon": "./assets/images/gtm.png",
       "edgeToEdgeEnabled": true,
       "package": "com.achaumba.gtmvalidateur"
     },
@@ -30,7 +27,6 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/gtm.png",
-          "imageWidth": 200,
           "resizeMode": "cover",
           "backgroundColor": "#ffffff"
         }
