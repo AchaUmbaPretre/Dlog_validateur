@@ -55,7 +55,8 @@ export interface BonSortie {
 }
 
 export interface AffectationItem {
-  id_bande_sortie: number
+  id_bande_sortie: number,
+  id_affectation_demande : number,
   date_prevue: string
   date_retour: string
   nom: string

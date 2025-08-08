@@ -73,17 +73,16 @@ const ListBonScreen = () => {
     });
   };
 
-  // Couleur selon état
-  const getEtatColor = (etat) => {
+  const getEtatColor = (etat : string) => {
     switch (etat) {
       case 'aujourdhui':
-        return '#28a745'; // vert
+        return '#28a745';
       case 'anterieur':
-        return '#dc3545'; // rouge
+        return '#dc3545';
       case 'ulterieur':
-        return '#ffc107'; // jaune
+        return '#ffc107';
       default:
-        return '#007bff'; // bleu
+        return '#007bff';
     }
   };
 
@@ -101,38 +100,38 @@ const ListBonScreen = () => {
       <View style={styles.row}>
         <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
         <Text style={styles.text}>
-          {item.nom_marque} ({item.immatriculation})
+          Marque & véhicule : {item.nom_marque} ({item.immatriculation})
         </Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_chauffeur || item.nom}</Text>
+        <Text style={styles.text}>Chauffeur : {item.nom_chauffeur || item.nom}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.dateHeureDepart}</Text>
+        <Text style={styles.text}>Départ : {item.dateHeureDepart}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_destination || item.destination}</Text>
+        <Text style={styles.text}>Destination : {item.nom_destination || item.destination}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_motif_demande || item.motif}</Text>
+        <Text style={styles.text}>Motif : {item.nom_motif_demande || item.motif}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_service || item.service}</Text>
+        <Text style={styles.text}>Service : {item.nom_service || item.service}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.personne_bord || item.personnesABord}</Text>
+        <Text style={styles.text}>A bord : {item.personne_bord || item.personnesABord}</Text>
       </View>
 
       <View style={styles.row}>

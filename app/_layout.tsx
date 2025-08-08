@@ -10,8 +10,6 @@ import { store } from '../redux/store';
 
 const { height } = Dimensions.get('window');
 
-
-
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);

@@ -59,7 +59,14 @@ const Plus = () => {
     );
   };
 
-  const options = [
+  type Option = {
+    label: string;
+    icon: any;
+    bgColor: string;
+    modalKey: ModalType;
+  };
+
+  const options : Option[] = [
     {
       label: 'Course',
       icon: Images.reservationIcon,
@@ -115,22 +122,16 @@ const Plus = () => {
   return (
     <View style={[styles.containerGlo, isDark && { backgroundColor: '#1c1c1e' }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.profileContainer}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>
-              {(user?.nom || '')
-                .split(' ')
-                .slice(0, 2)
-                .map((word: string) => word.charAt(0).toUpperCase())
-                .join('')}
-            </Text>
+          <View style={styles.header}>
+            <View style={styles.profileContainer}>
+              <View style={styles.avatarCircle}>
+                {(user?.nom || '').substring(0, 2).toUpperCase()}
+            </View>
+              <View>
+            <Text variant="titleMedium">{user?.nom}</Text>
+            <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
+          </View>
         </View>
-      <View>
-    <Text variant="titleMedium">{user?.nom}</Text>
-    <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
-  </View>
-</View>
 
         <TouchableOpacity onPress={handleLogout}>
           {loading ? (
@@ -204,18 +205,18 @@ export default Plus;
 
 const styles = StyleSheet.create({
   avatarCircle: {
-  width: 42,
-  height: 42,
-  borderRadius: 21,
-  backgroundColor: '#007bff',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-avatarText: {
-  color: '#fff',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
+    width: 40,
+    height: 40,
+    borderRadius: 21,
+    backgroundColor: '#007bff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
   containerGlo: {
     flex: 1,
     backgroundColor: '#f7f9fc',

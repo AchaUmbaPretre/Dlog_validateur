@@ -142,11 +142,7 @@ const Home = () => {
           <View style={styles.profileContainer}>
             <View style={styles.avatarCircle}>
               <Text style={styles.avatarText}>
-                {(user?.nom || '')
-                  .split(' ')
-                  .slice(0, 2)
-                  .map((word: string) => word.charAt(0).toUpperCase())
-                  .join('')}
+                {(user?.nom || '').substring(0, 2).toUpperCase()}
               </Text>
             </View>
             <View>
@@ -250,19 +246,29 @@ const Home = () => {
       </ScrollView>
 
       {/* Snackbar */}
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={5000}
-        style={{ backgroundColor: '#333' }}
-        action={{
-          label: 'Fermer',
-          textColor: '#fff',
-          onPress: () => setSnackbarVisible(false),
+      <View style={{ 
+        position: 'absolute', 
+        bottom: 56, // ou la hauteur de ta bottom bar (exemple: 56)
+        width: '100%', 
+        zIndex: 9999,
+        elevation: 9999,
         }}
       >
-        {snackbarMessage}
-      </Snackbar>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={5000}
+          style={{ backgroundColor: '#333' }}
+          action={{
+            label: 'Fermer',
+            textColor: '#fff',
+            onPress: () => setSnackbarVisible(false),
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
+      </View>
+
     </View>
   );
 };
@@ -290,8 +296,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   avatarCircle: {
-    width: 46,
-    height: 46,
+    width: 40,
+    height: 40,
     borderRadius: 23,
     backgroundColor: '#007bff',
     justifyContent: 'center',
@@ -300,17 +306,17 @@ const styles = StyleSheet.create({
   avatarText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: 'Inter-Bold',
   },
   userName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
     color: '#222',
   },
   userRole: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#777',
     fontFamily: 'Inter-Regular',
   },

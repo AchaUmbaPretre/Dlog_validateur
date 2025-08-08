@@ -71,43 +71,43 @@ const ListCourseScreen = () => {
       <View style={styles.row}>
         <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
         <Text style={styles.text}>
-          {item.nom_marque} ({item.immatriculation})
+          Marque : {item.nom_marque} ({item.immatriculation})
         </Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom}</Text>
+        <Text style={styles.text}>Chauffeur : {item.nom}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
-        <Text style={styles.text}>{formatDate(item.date_prevue)}</Text>
+        <Text style={styles.text}>Départ : {formatDate(item.date_prevue)}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="calendar-end" size={18} color="#007AFF" />
-        <Text style={styles.text}>{formatDate(item.date_retour)}</Text>
+        <Text style={styles.text}>Retour : {formatDate(item.date_retour)}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_destination}</Text>
+        <Text style={styles.text}>Destination : {item.nom_destination}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_motif_demande}</Text>
+        <Text style={styles.text}>Motif : {item.nom_motif_demande}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
-        <Text style={styles.text}>{item.nom_service}</Text>
+        <Text style={styles.text}>Service : {item.nom_service}</Text>
       </View>
 
       <View style={styles.row}>
         <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
-        <Text style={[styles.text, { fontWeight: '600' }]}>{item.personne_bord}</Text>
+        <Text style={[styles.text, { fontWeight: '600' }]}>A bord : {item.personne_bord}</Text>
       </View>
 
       <View style={styles.row}>
