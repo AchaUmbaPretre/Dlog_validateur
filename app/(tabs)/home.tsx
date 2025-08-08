@@ -166,14 +166,14 @@ useEffect(() => {
           </View>
         </View>
         
-                <TouchableOpacity onPress={handleLogout}>
-                  {loading ? (
-                    <ActivityIndicator animating size={24} />
-                  ) : (
-                    <Feather name="log-out" size={24} color="#d9534f" />
-                  )}
-                </TouchableOpacity>
-              </View>
+        <TouchableOpacity onPress={handleLogout}>
+          {loading ? (
+          <ActivityIndicator animating size={24} />
+          ) : (
+            <Feather name="log-out" size={24} color="#d9534f" />
+          )}
+          </TouchableOpacity>
+        </View>
 
         {/* Welcome Title */}
         <Text variant="titleLarge" style={styles.title}>👋 Bienvenue sur DLOG</Text>
@@ -192,21 +192,21 @@ useEffect(() => {
             </View>
           ) : (
             <>
-              {['aujourdhui', 'avenir', 'retard'].map((etat) => {
+              {['aujourdhui', 'avenir', 'ultérieur'].map((etat) => {
                 const filtered = bon.filter((item) => {
                   const datePrevue = moment.utc(item.date_prevue);
                   const today = moment.utc().startOf('day');
 
                   if (etat === 'aujourdhui') return datePrevue.isSame(today, 'day');
                   if (etat === 'avenir') return datePrevue.isAfter(today, 'day');
-                  if (etat === 'retard') return datePrevue.isBefore(today, 'day');
+                  if (etat === 'ultérieur') return datePrevue.isBefore(today, 'day');
                   return false;
                 });
 
                 if (filtered.length === 0) return null;
 
                 const titre = {
-                  retard: '🚨 En retard',
+                  ultérieur: '🚨 Ultérieur',
                   aujourdhui: '📅 Aujourd’hui',
                   avenir: '⏳ À venir',
                 }[etat];
