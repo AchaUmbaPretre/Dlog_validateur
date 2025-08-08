@@ -41,3 +41,30 @@ export interface FormState {
   personne_bord: string;
   commentaire: string;
 }
+
+export interface BonSortie {
+  id_bande_sortie: number;
+  nom_destination: string;
+  nom_chauffeur: string;
+  nom_marque: string;
+  nom_cat: string;
+  date_prevue: string;
+  date_retour: string;
+  immatriculation: string;
+  user_cr: string;
+}
+
+export interface AffectationItem {
+  id_bande_sortie: number
+  date_prevue: string
+  date_retour: string
+  nom: string
+  immatriculation: string
+  nom_marque: string
+  nom_cat: string
+  nom_motif_demande: string
+  nom_service: string
+  nom_destination: string
+  commentaire: string
+  personne_bord: string
+}

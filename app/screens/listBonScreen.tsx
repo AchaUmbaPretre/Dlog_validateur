@@ -1,212 +1,252 @@
-import { getBandeSortie } from '@/services/charroiService'
-import React, { useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native'
-import { Card, Paragraph, Surface, Text, Title } from 'react-native-paper'
-
-interface AffectationItem {
-  id_bande_sortie: number
-  date_prevue: string
-  date_retour: string
-  nom: string
-  immatriculation: string
-  nom_marque: string
-  nom_cat: string
-  nom_motif_demande: string
-  nom_service: string
-  nom_destination: string
-  commentaire: string
-  personne_bord: string
-}
+import { getBandeSortie } from '@/services/charroiService';
+import React, { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ListBonScreen = () => {
-  const [data, setData] = useState<AffectationItem[]>([])
-  const [filteredData, setFilteredData] = useState<AffectationItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [data, setData] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-  const fetchData = async () => {
-    try {
-      const response = await getBandeSortie()
-      setData(response.data)
-      setFilteredData(response.data)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getBandeSortie();
+        // On suppose que la réponse contient un tableau dans response.data
+        const fetchedData = response.data.map(item => ({
+          ...item,
+          etat: computeEtat(item.date_prevue),
+          dateHeureDepart: formatDate(item.date_prevue),
+          // Tu peux ajouter ici d'autres formats ou conversions si besoin
+        }));
+        setData(fetchedData);
+        setFiltered(fetchedData);
+      } catch (error) {
+        console.error('Erreur chargement bons :', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Met à jour filtered quand search ou data change
+  useEffect(() => {
+    if (!search.trim()) {
+      setFiltered(data);
+    } else {
+      const lower = search.toLowerCase();
+      setFiltered(
+        data.filter(
+          item =>
+            (item.nom?.toLowerCase().includes(lower) || '') ||
+            (item.immatriculation?.toLowerCase().includes(lower) || '') ||
+            (item.nom_chauffeur?.toLowerCase().includes(lower) || '')
+        )
+      );
     }
-  }
+  }, [search, data]);
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  // Calcul simple d'état par rapport à aujourd'hui
+  const computeEtat = (dateStr) => {
+    if (!dateStr) return 'inconnu';
+    const mDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  useEffect(() => {
-    const filtered = data.filter((item) =>
-      `${item.nom} ${item.immatriculation}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    )
-    setFilteredData(filtered)
-  }, [searchTerm, data])
+    if (mDate.toDateString() === today.toDateString()) return 'aujourdhui';
+    if (mDate < today) return 'anterieur';
+    return 'ulterieur';
+  };
 
-  const renderItem = ({ item }: { item: AffectationItem }) => (
-    <Card style={styles.card} elevation={3}>
-      <Card.Content>
-        <Title style={styles.title}>Bon #{item.id_bande_sortie}</Title>
-        <Paragraph style={styles.paragraph}>
-          🚗 Véhicule: {item.nom_marque} ({item.immatriculation})
-        </Paragraph>
-        <Paragraph style={styles.paragraph}>👤 Chauffeur: {item.nom}</Paragraph>
-        <Paragraph style={styles.paragraph}>📅 Départ: {formatDate(item.date_prevue)}</Paragraph>
-        <Paragraph style={styles.paragraph}>🕘 Retour: {formatDate(item.date_retour)}</Paragraph>
-        <Paragraph style={styles.paragraph}>📍 Destination: {item.nom_destination}</Paragraph>
-        <Paragraph style={styles.paragraph}>🎯 Motif: {item.nom_motif_demande}</Paragraph>
-        <Paragraph style={styles.paragraph}>🏢 Service: {item.nom_service}</Paragraph>
-        <Paragraph style={styles.commentaire}>📝 {item.commentaire || 'Aucun commentaire'}</Paragraph>
-        <Paragraph style={styles.personne}>👥 À bord: {item.personne_bord}</Paragraph>
-      </Card.Content>
-    </Card>
-  )
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString('fr-FR', {
+  // Format de date français
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    return new Date(dateStr).toLocaleString('fr-FR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
-  }
+    });
+  };
+
+  // Couleur selon état
+  const getEtatColor = (etat) => {
+    switch (etat) {
+      case 'aujourdhui':
+        return '#28a745'; // vert
+      case 'anterieur':
+        return '#dc3545'; // rouge
+      case 'ulterieur':
+        return '#ffc107'; // jaune
+      default:
+        return '#007bff'; // bleu
+    }
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>
+          <MaterialCommunityIcons name="file-document" size={18} color="#007AFF" /> Bon #{item.id_bande_sortie || item.id}
+        </Text>
+        <Text style={[styles.etat, { backgroundColor: getEtatColor(item.etat) }]}>
+          {item.etat}
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
+        <Text style={styles.text}>
+          {item.nom_marque} ({item.immatriculation})
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_chauffeur || item.nom}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.dateHeureDepart}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_destination || item.destination}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_motif_demande || item.motif}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_service || item.service}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.personne_bord || item.personnesABord}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="note-text" size={18} color="#007AFF" />
+        <Text style={[styles.text, { fontStyle: 'italic' }]}>
+          {item.commentaire || 'Aucun commentaire'}
+        </Text>
+      </View>
+    </View>
+  );
 
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <MaterialCommunityIcons name="loading" size={40} color="#007AFF" />
       </View>
-    )
+    );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.advancedHeaderWrapper}>
-        <View style={styles.blueSideBar} />
-        <Surface style={styles.advancedHeader} elevation={4}>
-          <Text style={styles.advancedHeaderText}>🚚 Liste de bons de sortie</Text>
-        </Surface>
-        <View style={styles.blueSideBar} />
+    <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="🔍 Rechercher par nom, chauffeur ou immatriculation..."
+          placeholderTextColor="#999"
+          value={search}
+          onChangeText={setSearch}
+        />
       </View>
 
-      <TextInput
-        placeholder="🔍 Rechercher par nom ou immatriculation..."
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-        style={styles.searchInput}
-        placeholderTextColor="#999"
-      />
-
       <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id_bande_sortie.toString()}
+        data={filtered}
+        keyExtractor={(item, index) => (item.id_bande_sortie || item.id || index).toString()}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Aucun bon de sortie trouvé.</Text>
+        }
+        contentContainerStyle={filtered.length === 0 && { flex: 1, justifyContent: 'center', alignItems: 'center' }}
       />
-    </SafeAreaView>
-  )
-}
+    </View>
+  );
+};
 
-export default ListBonScreen
+export default ListBonScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+    padding: 12,
   },
-  advancedHeaderWrapper: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 12,
-    marginTop: 18,
-    marginBottom: 10,
-  },
-  blueSideBar: {
-    width: 5,
-    height: 48,
-    backgroundColor: '#007AFF',
-    borderRadius: 3,
-  },
-  advancedHeader: {
-    flex: 1,
     backgroundColor: '#fff',
-    marginHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  advancedHeaderText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    elevation: 3,
   },
   searchInput: {
-    marginHorizontal: 16,
-    marginBottom: 10,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 8,
     fontSize: 16,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    color: '#1C1C1E',
+    color: '#222',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    elevation: 3,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#222',
+  },
+  etat: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    textTransform: 'capitalize',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  text: {
+    marginLeft: 8,
+    fontSize: 15,
+    color: '#444',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+    marginTop: 40,
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  listContent: {
-    padding: 12,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 14,
-    paddingHorizontal: 4,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 6,
-  },
-  paragraph: {
-    fontSize: 14,
-    color: '#3A3A3C',
-    marginBottom: 2,
-  },
-  commentaire: {
-    marginTop: 6,
-    fontStyle: 'italic',
-    color: '#8E8E93',
-  },
-  personne: {
-    marginTop: 2,
-    fontWeight: '600',
-    color: '#007AFF',
-  },
-})
+});

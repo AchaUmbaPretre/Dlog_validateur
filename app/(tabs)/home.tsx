@@ -1,9 +1,10 @@
 import { Images } from '@/assets/images';
 import { logout } from '@/redux/authSlice';
 import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiService';
+import { BonSortie } from '@/types';
 import { BonSortieCard } from '@/utils/BonSortieCard';
 import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
@@ -14,25 +15,12 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
 import { ActivityIndicator, Card, Snackbar, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-
-
-interface BonSortie {
-  id_bande_sortie: number;
-  nom_destination: string;
-  nom_chauffeur: string;
-  nom_marque: string;
-  nom_cat: string;
-  date_prevue: string;
-  date_retour: string;
-  immatriculation: string;
-  user_cr: string;
-}
-
 
 const Home = () => {
   const user = useSelector((state: any) => state.auth?.currentUser);
@@ -40,9 +28,10 @@ const Home = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const userId = useSelector((state: any) => state.auth?.currentUser?.id_utilisateur);
-  const [bon, setBon] = useState<BonSortie[]>([])
+  const [bon, setBon] = useState<BonSortie[]>([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = () => {
     Alert.alert(
@@ -71,43 +60,42 @@ const Home = () => {
     );
   };
 
-  const fetchData = async() => {
+  const fetchData = async () => {
     try {
-      const [ bonData ] = await Promise.all([
+      const [bonData] = await Promise.all([
         getBandeSortieUnique(userId),
-      ])
-      setBon(bonData.data)
+      ]);
+      setBon(bonData.data);
     } catch (error) {
-     Alert.alert("Erreur", "Échec de chargement des données.");
+      Alert.alert("Erreur", "Échec de chargement des données.");
     }
-  }
-
-useEffect(() => {
-  fetchData();
-
-  const interval = setInterval(fetchData, 5000);
-
-  const unsubscribe = NetInfo.addEventListener(state => {
-    if (state.isConnected) {
-      syncPendingValidations(
-        () => {
-          setSnackbarMessage("✅ Données hors ligne synchronisées.");
-          setSnackbarVisible(true);
-          fetchData();
-        },
-        (err) => {
-          console.log("❌ Erreur de synchro :", err);
-        }
-      );
-    }
-  });
-
-  return () => {
-    clearInterval(interval);
-    unsubscribe(); 
   };
-}, []);
 
+  useEffect(() => {
+    fetchData();
+
+    const interval = setInterval(fetchData, 5000);
+
+    const unsubscribe = NetInfo.addEventListener(state => {
+      if (state.isConnected) {
+        syncPendingValidations(
+          () => {
+            setSnackbarMessage("✅ Données hors ligne synchronisées.");
+            setSnackbarVisible(true);
+            fetchData();
+          },
+          (err) => {
+            console.log("❌ Erreur de synchro :", err);
+          }
+        );
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, []);
 
   const onFinish = (d: BonSortie): void => {
     const heure = new Date(d.date_prevue).toLocaleTimeString('fr-FR', {
@@ -148,6 +136,7 @@ useEffect(() => {
   return (
     <View style={styles.safeArea}>
       <ScrollView style={styles.container}>
+        
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.profileContainer}>
@@ -158,95 +147,122 @@ useEffect(() => {
                   .slice(0, 2)
                   .map((word: string) => word.charAt(0).toUpperCase())
                   .join('')}
-                </Text>
-                </View>
-              <View>
-            <Text variant="titleMedium">{user?.nom}</Text>
-            <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
+              </Text>
+            </View>
+            <View>
+              <Text style={styles.userName}>{user?.nom}</Text>
+              <Text style={styles.userRole}>{user?.role}</Text>
+            </View>
           </View>
-        </View>
-        
-        <TouchableOpacity onPress={handleLogout}>
-          {loading ? (
-          <ActivityIndicator animating size={24} />
-          ) : (
-            <Feather name="log-out" size={24} color="#d9534f" />
-          )}
+
+          <TouchableOpacity onPress={handleLogout}>
+            {loading ? (
+              <ActivityIndicator animating size={24} />
+            ) : (
+              <Feather name="log-out" size={26} color="#d9534f" />
+            )}
           </TouchableOpacity>
         </View>
 
         {/* Welcome Title */}
-        <Text variant="titleLarge" style={styles.title}>👋 Bienvenue sur DLOG</Text>
+        <Text style={styles.title}>👋 Bienvenue sur DLOG</Text>
 
-        {/* Image */}
+        {/* Banner Image */}
         <Card style={styles.imageCard}>
           <Image source={Images.backIcon} style={styles.backImage} />
         </Card>
 
-        <Text variant="titleLarge" style={styles.title}>⚙️ Liste de bons de sortie</Text>
+        {/* Section Title */}
+        <Text style={styles.sectionTitle}>
+          <MaterialCommunityIcons name="file-document-multiple" size={20} color="#333" /> Liste des bons de sortie
+        </Text>
 
+        <TextInput
+          placeholder="🔍 Rechercher par chauffeur ou immatriculation"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{
+            backgroundColor: '#fff',
+            padding: 10,
+            borderRadius: 8,
+            marginBottom: 15,
+            borderWidth: 1,
+            borderColor: '#ddd',
+          }}
+        />
+
+        {/* List */}
         <View style={{ marginBottom: 40 }}>
           {bon.length === 0 ? (
-            <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color: '#888' }}>Aucun bon de sortie disponible</Text>
+            <View style={styles.emptyState}>
+              <MaterialCommunityIcons name="file-search-outline" size={50} color="#ccc" />
+              <Text style={{ color: '#888', marginTop: 8 }}>Aucun bon de sortie disponible</Text>
             </View>
           ) : (
-            <>
-              {['aujourdhui', 'avenir', 'ultérieur'].map((etat) => {
-                const filtered = bon.filter((item) => {
-                  const datePrevue = moment.utc(item.date_prevue);
-                  const today = moment.utc().startOf('day');
+            ['aujourdhui', 'ultérieur', 'antérieur'].map((etat) => {
+              const filtered = bon
+              .filter((item) => {
+                const datePrevue = moment.utc(item.date_prevue);
+                const today = moment.utc().startOf('day');
 
-                  if (etat === 'aujourdhui') return datePrevue.isSame(today, 'day');
-                  if (etat === 'avenir') return datePrevue.isAfter(today, 'day');
-                  if (etat === 'ultérieur') return datePrevue.isBefore(today, 'day');
-                  return false;
-                });
-
-                if (filtered.length === 0) return null;
-
-                const titre = {
-                  ultérieur: '🚨 Ultérieur',
-                  aujourdhui: '📅 Aujourd’hui',
-                  avenir: '⏳ À venir',
-                }[etat];
-
+                if (etat === 'aujourdhui') return datePrevue.isSame(today, 'day');
+                if (etat === 'antérieur') return datePrevue.isBefore(today, 'day');
+                if (etat === 'ultérieur') return datePrevue.isAfter(today, 'day');
+                return false;
+              })
+              .filter((item) => {
+                const searchLower = searchQuery.toLowerCase();
                 return (
-                  <View key={etat} style={{ marginBottom: 20 }}>
-                    <Text variant="titleMedium" style={{ marginBottom: 10 }}>{titre}</Text>
-                    {filtered.map((item, index) => (
-                      <BonSortieCard
-                        key={`${etat}-${index}`}
-                        data={{
-                          ...item,
-                          dateHeurePrevue: item.date_prevue
-                            ? moment.utc(item.date_prevue).format('DD-MM-YYYY HH:mm')
-                            : '',
-                          dateHeureRetour: item.date_retour
-                            ? moment.utc(item.date_retour).format('DD-MM-YYYY HH:mm')
-                            : '',
-                        }}
-                        onFinish={onFinish}
-                      />
-                    ))}
-                  </View>
+                  item.nom_chauffeur.toLowerCase().includes(searchLower) ||
+                  item.immatriculation?.toLowerCase().includes(searchLower)
                 );
-              })}
-            </>
+              });
+
+              if (filtered.length === 0) return null;
+
+              const titre = {
+                antérieur: '🚨 Antérieur',
+                aujourdhui: '📅 Aujourd’hui',
+                ultérieur: '⏳ Ultérieur',
+              }[etat];
+
+              return (
+                <View key={etat} style={{ marginBottom: 20 }}>
+                  <Text style={styles.groupTitle}>{titre}</Text>
+                  {filtered.map((item, index) => (
+                    <BonSortieCard
+                      key={`${etat}-${index}`}
+                      data={{
+                        ...item,
+                        dateHeurePrevue: item.date_prevue
+                          ? moment.utc(item.date_prevue).format('DD-MM-YYYY HH:mm')
+                          : '',
+                        immatriculation: item.immatriculation || 'N/A', // ajout
+                      }}
+                      onFinish={onFinish}
+                    />
+                  ))}
+                </View>
+              );
+            })
           )}
         </View>
       </ScrollView>
+
+      {/* Snackbar */}
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={5000}
+        style={{ backgroundColor: '#333' }}
         action={{
           label: 'Fermer',
+          textColor: '#fff',
           onPress: () => setSnackbarVisible(false),
         }}
       >
-          {snackbarMessage}
-        </Snackbar>
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 };
@@ -256,7 +272,8 @@ export default Home;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingVertical: 10
+    paddingVertical: 10,
+    backgroundColor: '#f9f9f9',
   },
   container: {
     paddingHorizontal: 20,
@@ -265,71 +282,71 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 15,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 21,
-  },
   avatarCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#007bff',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-  title: {
-    marginVertical: 20,
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 18
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    color: '#222',
+  },
+  userRole: {
+    fontSize: 13,
+    color: '#777',
+    fontFamily: 'Inter-Regular',
+  },
+  title: {
+    marginVertical: 15,
+    fontWeight: 'bold',
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#111',
   },
   imageCard: {
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: 'hidden',
+    elevation: 3,
+    marginBottom: 20,
   },
   backImage: {
     width: '100%',
     height: 200,
     resizeMode: 'cover',
   },
-  card: {
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    elevation: 2,
-    padding: 10
+  sectionTitle: {
+    fontWeight: '700',
+    fontSize: 18,
+    marginBottom: 15,
+    fontFamily: 'Inter-Bold',
+    color: '#333',
   },
-
-  bold: {
+  emptyState: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  groupTitle: {
+    fontSize: 16,
     fontWeight: '600',
+    marginBottom: 8,
+    fontFamily: 'Inter-SemiBold',
   },
-  cardTitle: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  color: '#333',
-},
-cardSubtitle: {
-  fontSize: 14,
-  color: '#888',
-},
-row: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginVertical: 4,
-},
-value: {
-  fontWeight: '600',
-  color: '#333',
-},
 });

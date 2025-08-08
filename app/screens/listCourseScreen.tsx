@@ -1,210 +1,218 @@
-import { getAffectationDemande } from '@/services/charroiService'
-import React, { useEffect, useState } from 'react'
+import { getAffectationDemande } from '@/services/charroiService';
+import { AffectationItem } from '@/types';
+import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   SafeAreaView,
   StyleSheet,
+  Text,
   TextInput,
-  View,
-} from 'react-native'
-import { Card, Paragraph, Surface, Text, Title } from 'react-native-paper'
-
-interface AffectationItem {
-  id_affectation_demande: number
-  date_prevue: string
-  date_retour: string
-  nom: string
-  immatriculation: string
-  nom_marque: string
-  nom_cat: string
-  nom_motif_demande: string
-  nom_service: string
-  nom_destination: string
-  commentaire: string
-  personne_bord: string
-}
+  View
+} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ListCourseScreen = () => {
-  const [data, setData] = useState<AffectationItem[]>([])
-  const [filteredData, setFilteredData] = useState<AffectationItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [data, setData] = useState<AffectationItem[]>([]);
+  const [filtered, setFiltered] = useState<AffectationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-  const fetchData = async () => {
-    try {
-      const response = await getAffectationDemande()
-      setData(response.data)
-      setFilteredData(response.data)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getAffectationDemande();
+        setData(response.data);
+        setFiltered(response.data);
+      } catch (error) {
+        console.error('Erreur chargement courses :', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setFiltered(data);
+    } else {
+      const lower = search.toLowerCase();
+      setFiltered(
+        data.filter(
+          item =>
+            item.nom.toLowerCase().includes(lower) ||
+            item.nom_marque.toLowerCase().includes(lower) ||
+            item.nom_destination.toLowerCase().includes(lower) ||
+            item.immatriculation.toLowerCase().includes(lower)
+        )
+      );
     }
-  }
+  }, [search, data]);
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    const lowerSearch = search.toLowerCase()
-    const filtered = data.filter(
-      (item) =>
-        item.nom.toLowerCase().includes(lowerSearch) ||
-        item.nom_marque.toLowerCase().includes(lowerSearch) ||
-        item.nom_destination.toLowerCase().includes(lowerSearch) ||
-        item.immatriculation.toLowerCase().includes(lowerSearch)
-    )
-    setFilteredData(filtered)
-  }, [search, data])
-
-  const renderItem = ({ item }: { item: AffectationItem }) => (
-    <Card style={styles.card} elevation={3}>
-      <Card.Content>
-        <Title style={styles.title}>Course #{item.id_affectation_demande}</Title>
-        <Paragraph style={styles.paragraph}>
-          🚗 Véhicule: {item.nom_marque} ({item.immatriculation})
-        </Paragraph>
-        <Paragraph style={styles.paragraph}>👤 Chauffeur: {item.nom}</Paragraph>
-        <Paragraph style={styles.paragraph}>📅 Départ: {formatDate(item.date_prevue)}</Paragraph>
-        <Paragraph style={styles.paragraph}>🕘 Retour: {formatDate(item.date_retour)}</Paragraph>
-        <Paragraph style={styles.paragraph}>📍 Destination: {item.nom_destination}</Paragraph>
-        <Paragraph style={styles.paragraph}>🎯 Motif: {item.nom_motif_demande}</Paragraph>
-        <Paragraph style={styles.paragraph}>🏢 Service: {item.nom_service}</Paragraph>
-        <Paragraph style={styles.commentaire}>📝 {item.commentaire || 'Aucun commentaire'}</Paragraph>
-        <Paragraph style={styles.personne}>👥 À bord: {item.personne_bord}</Paragraph>
-      </Card.Content>
-    </Card>
-  )
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString('fr-FR', {
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'N/A';
+    return new Date(dateStr).toLocaleString('fr-FR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
-  }
+    });
+  };
+
+  const renderItem = ({ item }: { item: AffectationItem }) => (
+    <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>
+          <MaterialCommunityIcons name="car-multiple" size={18} color="#007AFF" /> Course #{item.id_affectation_demande}
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
+        <Text style={styles.text}>
+          {item.nom_marque} ({item.immatriculation})
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
+        <Text style={styles.text}>{formatDate(item.date_prevue)}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="calendar-end" size={18} color="#007AFF" />
+        <Text style={styles.text}>{formatDate(item.date_retour)}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_destination}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_motif_demande}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
+        <Text style={styles.text}>{item.nom_service}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
+        <Text style={[styles.text, { fontWeight: '600' }]}>{item.personne_bord}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="note-text" size={18} color="#007AFF" />
+        <Text style={[styles.text, { fontStyle: 'italic' }]}>
+          {item.commentaire || 'Aucun commentaire'}
+        </Text>
+      </View>
+    </View>
+  );
 
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <MaterialCommunityIcons name="loading" size={40} color="#007AFF" />
       </View>
-    )
+    );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.blueBar} />
-        <Surface style={styles.header} elevation={4}>
-          <Text style={styles.headerTitle}>📋 LISTE DES COURSES</Text>
-        </Surface>
-        <View style={styles.blueBar} />
+      <View style={styles.searchContainer}>
+        <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="🔍 Rechercher par chauffeur, véhicule, destination..."
+          placeholderTextColor="#999"
+          value={search}
+          onChangeText={setSearch}
+        />
       </View>
 
-      <TextInput
-        placeholder="🔍 Rechercher par chauffeur, véhicule, destination..."
-        value={search}
-        onChangeText={setSearch}
-        style={styles.searchInput}
-        placeholderTextColor="#999"
-      />
-
       <FlatList
-        data={filteredData}
+        data={filtered}
         keyExtractor={(item) => item.id_affectation_demande.toString()}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Aucune course trouvée.</Text>
+        }
+        contentContainerStyle={filtered.length === 0 && { flex: 1, justifyContent: 'center', alignItems: 'center' }}
       />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default ListCourseScreen
+export default ListCourseScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+    padding: 12,
   },
-  headerContainer: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: 10,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  blueBar: {
-    width: 4,
-    height: 40,
-    backgroundColor: '#007AFF',
-    borderRadius: 2,
-  },
-  header: {
-    flex: 1,
     backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginHorizontal: 8,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    elevation: 3,
   },
   searchInput: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    color: '#222',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    elevation: 3,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#222',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  text: {
+    marginLeft: 8,
     fontSize: 15,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    color: '#000',
+    color: '#444',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+    marginTop: 40,
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  listContent: {
-    padding: 12,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 14,
-    paddingHorizontal: 4,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    marginBottom: 6,
-  },
-  paragraph: {
-    fontSize: 14,
-    color: '#3A3A3C',
-    marginBottom: 2,
-  },
-  commentaire: {
-    marginTop: 6,
-    fontStyle: 'italic',
-    color: '#8E8E93',
-  },
-  personne: {
-    marginTop: 2,
-    fontWeight: '600',
-    color: '#007AFF',
-  },
-})
+});
