@@ -154,7 +154,6 @@ useEffect(() => {
                 <>
                   <Text style={styles.modalTitle}>Détail du Bon #{selectedBon.id_bande_sortie}</Text>
 
-                  {/* Statut avec badge coloré */}
                   <View style={[styles.detailRow, { marginBottom: 15 }]}>
                     <MaterialCommunityIcons name="clipboard-text" size={22} color="#007AFF" />
                     <View style={[styles.statusBadgeModal, { backgroundColor: statusIcons[selectedBon.nom_statut_bs]?.color || '#777' }]}>
@@ -162,7 +161,6 @@ useEffect(() => {
                     </View>
                   </View>
 
-                  {/* Véhicule */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="car" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -170,7 +168,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Chauffeur */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="account" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -178,7 +175,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Date prévue */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="calendar-clock" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -192,7 +188,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Sortie réelle ou prévue */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="exit-run" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -214,7 +209,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Date retour prévue */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="calendar-clock" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -228,7 +222,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Retour réel ou prévu */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="exit-to-app" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -252,7 +245,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Destination */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="map-marker" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -260,7 +252,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Motif */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="clipboard-check" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -268,7 +259,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Service demandeur */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="office-building" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -276,7 +266,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Personne à bord */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="account-group" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -284,7 +273,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Commentaire */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="comment-text" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -292,7 +280,6 @@ useEffect(() => {
                     </Text>
                   </View>
 
-                  {/* Créé par */}
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="account" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
