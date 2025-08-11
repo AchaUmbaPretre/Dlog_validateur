@@ -48,7 +48,7 @@ export function useFetchData() {
       setMotifList(motifData.data);
       setDestinationList(destinationData.data);
       setClientList(clientData.data);
-      setVehicule(vehiculeDataV.data.data)
+      setVehicule(vehiculeDataV.data)
     } catch (err) {
       Alert.alert("Erreur", "Échec de chargement des données.");
     } finally {

@@ -35,12 +35,12 @@ interface ShowPickerState {
 }
 
 const pickerFields = [
-  { label: "Véhicule *", key: "id_vehicule", dataKey: "vehiculeList", labelProp: "immatriculation", valueProp: "id_vehicule" },
-  { label: "Chauffeur *", key: "id_chauffeur", dataKey: "chauffeurList", labelProp: "nom", valueProp: "id_chauffeur" },
-  { label: "Motif *", key: "id_motif_demande", dataKey: "motifList", labelProp: "nom_motif_demande", valueProp: "id_motif_demande" },
-  { label: "Service Demandeur *", key: "id_demandeur", dataKey: "serviceList", labelProp: "nom_service", valueProp: "id_service_demandeur" },
-  { label: "Client", key: "id_client", dataKey: "clientList", labelProp: "nom", valueProp: "id_client" },
-  { label: "Destination", key: "id_destination", dataKey: "destinationList", labelProp: "nom_destination", valueProp: "id_destination" },
+  { label: "Véhicule", key: "id_vehicule", dataKey: "vehiculeList", labelProp: "immatriculation", valueProp: "id_vehicule", required: true },
+  { label: "Chauffeur", key: "id_chauffeur", dataKey: "chauffeurList", labelProp: "nom", valueProp: "id_chauffeur", required: true },
+  { label: "Motif", key: "id_motif_demande", dataKey: "motifList", labelProp: "nom_motif_demande", valueProp: "id_motif_demande", required: true },
+  { label: "Service Demandeur", key: "id_demandeur", dataKey: "serviceList", labelProp: "nom_service", valueProp: "id_service_demandeur", required: true },
+  { label: "Client", key: "id_client", dataKey: "clientList", labelProp: "nom", valueProp: "id_client", required: false },
+  { label: "Destination", key: "id_destination", dataKey: "destinationList", labelProp: "nom_destination", valueProp: "id_destination", required: true },
 ];
 
 const CourseScreen: React.FC = () => {
@@ -55,10 +55,6 @@ const CourseScreen: React.FC = () => {
     clientList,
     fetchDatas,
   } = useFetchData();
-
-    console.log(vehiculeList)
-
-
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [affectationId, setAffectationId] = useState<number | null>(null);
@@ -88,7 +84,13 @@ const CourseScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.id_vehicule || !form.id_chauffeur || !form.id_motif_demande || !form.id_demandeur) {
+    if (
+      !form.id_vehicule ||
+      !form.id_chauffeur ||
+      !form.id_motif_demande ||
+      !form.id_demandeur ||
+      !form.id_destination
+    ) {
       Alert.alert("Champs requis", "Veuillez remplir tous les champs obligatoires (*)");
       return;
     }
@@ -130,7 +132,8 @@ const CourseScreen: React.FC = () => {
     key: keyof FormState,
     data: any[],
     labelProp: string,
-    valueProp: string
+    valueProp: string,
+    required?: boolean
   ) => {
     let filteredData = data;
 
@@ -150,21 +153,17 @@ const CourseScreen: React.FC = () => {
 
     return (
       <View style={styles.field} key={key}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={{ color: "red" }}> *</Text>}
+        </Text>
 
         {key === "id_vehicule" && (
           <TextInput
             placeholder="Rechercher véhicule (immat, marque, modèle)"
             value={searchVehicule}
             onChangeText={setSearchVehicule}
-            style={{
-              marginBottom: 8,
-              borderWidth: 1,
-              borderColor: "#ccc",
-              borderRadius: 6,
-              paddingHorizontal: 10,
-              height: 40,
-            }}
+            style={styles.searchInput}
           />
         )}
 
@@ -173,14 +172,7 @@ const CourseScreen: React.FC = () => {
             placeholder="Rechercher chauffeur (nom prénom)"
             value={searchChauffeur}
             onChangeText={setSearchChauffeur}
-            style={{
-              marginBottom: 8,
-              borderWidth: 1,
-              borderColor: "#ccc",
-              borderRadius: 6,
-              paddingHorizontal: 10,
-              height: 40,
-            }}
+            style={styles.searchInput}
           />
         )}
 
@@ -235,14 +227,33 @@ const CourseScreen: React.FC = () => {
     }
   };
 
-  const renderDateTimePicker = (label: string, value: Date | null, onChange: (date: Date) => void) => (
-    <View style={styles.field} key={label}>
+const renderDateTimePicker = (label: string, value: Date | null, onChange: (date: Date) => void) => (
+  <View style={styles.dateTimeField} key={label}>
+    <View style={{ flex: 1 }}>
       <Text style={styles.label}>{label}</Text>
-      <Button mode="outlined" onPress={() => openPicker(label, value, onChange)} style={{ borderRadius: 0, borderColor: "#ccc" }}>
-        <Text style={{ color: "#555" }}>{value ? value.toLocaleString() : "Choisir la date et l'heure"}</Text>
+      <Button
+        mode="outlined"
+        onPress={() => openPicker(label, value, onChange)}
+        style={styles.dateButton}
+        contentStyle={{ justifyContent: 'center' }}
+      >
+        <Text style={styles.dateButtonText}>
+          {value ? value.toLocaleString() : "Choisir la date et l'heure"}
+        </Text>
       </Button>
     </View>
-  );
+
+    <TouchableOpacity
+      style={styles.todayButtonCompact}
+      onPress={() => onChange(new Date())}
+      activeOpacity={0.7}
+      accessibilityLabel={`Définir ${label} à aujourd'hui`}
+    >
+      <Text style={styles.todayButtonTextCompact}>Aujourd'hui</Text>
+    </TouchableOpacity>
+  </View>
+);
+
 
   const onToggleSwitch = () => setCreateBS((prev) => !prev);
 
@@ -265,11 +276,12 @@ const CourseScreen: React.FC = () => {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.inner}>
-            <Surface style={styles.titleContainer} elevation={4}>
-              <View style={styles.titleBar} />
+            <Surface style={styles.titleContainer} elevation={6}>
+              <View style={styles.decorativeBarLeft} />
               <Title style={styles.titleText}>Créer une course</Title>
-              <View style={styles.titleBar} />
+              <View style={styles.decorativeBarRight} />
             </Surface>
+
             {loading ? (
               <ActivityIndicator size="large" color="#007AFF" />
             ) : (
@@ -278,15 +290,22 @@ const CourseScreen: React.FC = () => {
                   {renderDateTimePicker("Date & heure de départ prévue", datePrevue, setDatePrevue)}
                   {renderDateTimePicker("Date & heure de retour prévue", dateRetour, setDateRetour)}
 
-                  {pickerFields.map(({ label, key, dataKey, labelProp, valueProp }) =>
-                    renderPicker(label, key, {
-                      vehiculeList,
-                      chauffeurList,
-                      motifList,
-                      serviceList,
-                      destinationList,
-                      clientList,
-                    }[dataKey], labelProp, valueProp)
+                  {pickerFields.map(({ label, key, dataKey, labelProp, valueProp, required }) =>
+                    renderPicker(
+                      label,
+                      key,
+                      {
+                        vehiculeList,
+                        chauffeurList,
+                        motifList,
+                        serviceList,
+                        destinationList,
+                        clientList,
+                      }[dataKey],
+                      labelProp,
+                      valueProp,
+                      required
+                    )
                   )}
 
                   <Text style={styles.label}>Personnes à bord</Text>
@@ -298,17 +317,19 @@ const CourseScreen: React.FC = () => {
                     style={styles.input}
                   />
 
-                  <Text style={styles.label}>Commentaire *</Text>
+                  <Text style={styles.label}>Commentaire</Text>
                   <TextInput
                     mode="outlined"
                     placeholder="Commenter..."
                     value={form.commentaire}
                     onChangeText={(val) => handleChange("commentaire", val)}
                     style={styles.input}
+                    multiline
+                    numberOfLines={3}
                   />
 
                   <Text style={styles.label}>Créer bon de BS</Text>
-                  <Switch style={styles.input} value={createBS} onValueChange={onToggleSwitch} />
+                  <Switch style={styles.switch} value={createBS} onValueChange={onToggleSwitch} />
 
                   <Button mode="contained" onPress={handleSubmit} loading={loading} disabled={loading} style={styles.button}>
                     Soumettre
@@ -345,7 +366,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "#F0F2F5"
+    backgroundColor: "#F0F2F5",
   },
   scrollContainer: {
     flex: 1,
@@ -358,33 +379,53 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   titleContainer: {
-    marginTop: 20,
-    marginBottom: 24,
-    paddingVertical: 10,
-    backgroundColor: "#fff",
+    marginTop: 24,
+    marginBottom: 32,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
+    justifyContent: "center",
+    shadowColor: "#00000033",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
+    elevation: 8,
   },
-  titleBar: {
-    width: 4,
-    height: "100%",
-    backgroundColor: "#2563EB",
+  decorativeBarLeft: {
+    width: 8,
+    height: 20,
     borderRadius: 4,
+    backgroundColor: "#2563EB",
+    marginRight: 20,
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  decorativeBarRight: {
+    width: 8,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: "#2563EB",
+    marginLeft: 20,
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
   },
   titleText: {
-    flex: 1,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+    letterSpacing: 1.2,
     textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1E293B",
-    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : "Roboto",
   },
   label: {
     marginTop: 16,
@@ -396,19 +437,66 @@ const styles = StyleSheet.create({
   field: {
     marginBottom: 12,
   },
+  searchInput: {
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    height: 40,
+    backgroundColor: "#fff",
+  },
   pickerWrapper: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 6,
     backgroundColor: "#fff",
   },
+  dateTimeField: {
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateButton: {
+    borderRadius: 6,
+    borderColor: "#ccc",
+    height: 48,
+    justifyContent: 'center',
+  },
+  dateButtonText: {
+    color: "#555",
+    fontSize: 15,
+  },
+  todayButton: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginLeft: 12,
+    elevation: 4,
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+  },
+  todayButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+    letterSpacing: 0.7,
+  },
   input: {
     marginBottom: 12,
     backgroundColor: "#fff",
   },
+  switch: {
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+  },
   card: {
     paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     borderRadius: 16,
     backgroundColor: "#fff",
     shadowColor: "#000",
@@ -419,12 +507,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   button: {
-    marginTop: 16,
+    marginTop: 24,
     borderRadius: 8,
-    paddingVertical: 6,
+    paddingVertical: 10,
   },
   modalHeader: {
     alignItems: "flex-end",
     padding: 15,
   },
+  todayButtonCompact: {
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  borderRadius: 4,
+  backgroundColor: "transparent",
+  borderWidth: 1,
+  borderColor: "#2563EB",
+  marginLeft: 12,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+todayButtonTextCompact: {
+  color: "#2563EB",
+  fontWeight: "600",
+  fontSize: 13,
+},
 });
