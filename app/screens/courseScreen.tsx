@@ -56,13 +56,15 @@ const CourseScreen: React.FC = () => {
     fetchDatas,
   } = useFetchData();
 
+    console.log(vehiculeList)
+
+
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [affectationId, setAffectationId] = useState<number | null>(null);
   const [createBS, setCreateBS] = useState(true);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-
   const [form, setForm] = useState<FormState>({
     id_vehicule: null,
     id_chauffeur: null,
@@ -73,10 +75,11 @@ const CourseScreen: React.FC = () => {
     personne_bord: "",
     commentaire: "",
   });
-
   const [datePrevue, setDatePrevue] = useState<Date | null>(null);
   const [dateRetour, setDateRetour] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<ShowPickerState | null>(null);
+  const [searchVehicule, setSearchVehicule] = useState("");
+  const [searchChauffeur, setSearchChauffeur] = useState("");
 
   const router = useRouter();
 
@@ -128,19 +131,76 @@ const CourseScreen: React.FC = () => {
     data: any[],
     labelProp: string,
     valueProp: string
-  ) => (
-    <View style={styles.field} key={key}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker selectedValue={form[key]} onValueChange={(val) => handleChange(key, val)}>
-          <Picker.Item label={`-- Sélectionner ${label.toLowerCase()} --`} value={null} />
-          {data.map((item, index) => (
-            <Picker.Item key={`${key}-${item[valueProp] ?? index}`} label={item[labelProp]} value={item[valueProp]} />
-          ))}
-        </Picker>
+  ) => {
+    let filteredData = data;
+
+    if (key === "id_vehicule") {
+      filteredData = data.filter((item) => {
+        const search = searchVehicule.toLowerCase();
+        const immat = (item.immatriculation ?? "").toLowerCase();
+        const marque = (item.nom_marque ?? "").toLowerCase();
+        const modele = (item.modele ?? "").toLowerCase();
+        return immat.includes(search) || marque.includes(search) || modele.includes(search);
+      });
+    } else if (key === "id_chauffeur") {
+      filteredData = data.filter((item) =>
+        `${item.nom} ${item.prenom}`.toLowerCase().includes(searchChauffeur.toLowerCase())
+      );
+    }
+
+    return (
+      <View style={styles.field} key={key}>
+        <Text style={styles.label}>{label}</Text>
+
+        {key === "id_vehicule" && (
+          <TextInput
+            placeholder="Rechercher véhicule (immat, marque, modèle)"
+            value={searchVehicule}
+            onChangeText={setSearchVehicule}
+            style={{
+              marginBottom: 8,
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 6,
+              paddingHorizontal: 10,
+              height: 40,
+            }}
+          />
+        )}
+
+        {key === "id_chauffeur" && (
+          <TextInput
+            placeholder="Rechercher chauffeur (nom prénom)"
+            value={searchChauffeur}
+            onChangeText={setSearchChauffeur}
+            style={{
+              marginBottom: 8,
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 6,
+              paddingHorizontal: 10,
+              height: 40,
+            }}
+          />
+        )}
+
+        <View style={styles.pickerWrapper}>
+          <Picker selectedValue={form[key]} onValueChange={(val) => handleChange(key, val)}>
+            <Picker.Item label={`-- Sélectionner ${label.toLowerCase()} --`} value={null} />
+            {filteredData.map((item, index) => {
+              const optionLabel =
+                key === "id_vehicule"
+                  ? `${item.immatriculation} - ${item.nom_marque}${item.modele ? ` - ${item.modele}` : ""}`
+                  : key === "id_chauffeur"
+                  ? `${item.nom} ${item.prenom}`
+                  : item[labelProp];
+              return <Picker.Item key={`${key}-${item[valueProp] ?? index}`} label={optionLabel} value={item[valueProp]} />;
+            })}
+          </Picker>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const openPicker = (label: string, value: Date | null, onChange: (date: Date) => void) => {
     const initialDate = value || new Date();
@@ -298,19 +358,19 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   titleContainer: {
-  marginTop: 20,
-  marginBottom: 24,
-  paddingVertical: 10,
-  backgroundColor: "#fff",
-  borderRadius: 16,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.1,
-  shadowRadius: 12,
-  elevation: 6,
+    marginTop: 20,
+    marginBottom: 24,
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   titleBar: {
     width: 4,
