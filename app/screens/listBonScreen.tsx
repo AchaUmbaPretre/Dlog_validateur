@@ -1,6 +1,6 @@
 import BonItems from '@/composants/bonItems';
 import { getBandeSortie } from '@/services/charroiService';
-import { BonSortie } from '@/types';
+import { BonSortie, StatusConfig, StatusKey } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,29 +23,50 @@ const ListBonScreen = () => {
     setSelectedBon(null);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getBandeSortie();
-        // On suppose que la réponse contient un tableau dans response.data
-        const fetchedData = response.data.map(item => ({
-          ...item,
-          etat: computeEtat(item.date_prevue),
-          dateHeureDepart: formatDate(item.date_prevue),
-        }));
-        setData(fetchedData);
-        setFiltered(fetchedData);
-      } catch (error) {
-        console.error('Erreur chargement bons :', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const statusIcons: Record<StatusKey, StatusConfig> = {
+  "En attente d'affectation": { icon: "clock-outline", color: "#ffc107" },
+  "Véhicule affecté": { icon: "car", color: "#17a2b8" },
+  "En attente de validation du BS": { icon: "clipboard-clock-outline", color: "#6f42c1" },
+  "BS validé": { icon: "check-circle-outline", color: "#28a745" },
+  "En cours": { icon: "progress-clock", color: "#007bff" },
+  "Sorti": { icon: "exit-run", color: "#28a745" },
+  "Retourné": { icon: "exit-to-app", color: "#dc3545" },
+  "Annulé": { icon: "close-circle-outline", color: "#6c757d" },
+};
 
+useEffect(() => {
+  let isMounted = true;
+
+  const fetchData = async () => {
+    try {
+      const response = await getBandeSortie();
+      if (!isMounted) return;
+      const fetchedData = response.data.map(item => ({
+        ...item,
+        etat: computeEtat(item.date_prevue),
+        dateHeureDepart: formatDate(item.date_prevue),
+      }));
+      setData(fetchedData);
+      setFiltered(fetchedData);
+    } catch (error) {
+      console.error('Erreur chargement bons :', error);
+    } finally {
+      if (isMounted) setLoading(false);
+    }
+  };
+
+  fetchData();
+
+  const intervalId = setInterval(() => {
     fetchData();
-  }, []);
+  }, 20000);
 
-  // Met à jour filtered quand search ou data change
+  return () => {
+    isMounted = false;
+    clearInterval(intervalId);
+  };
+}, []);
+
   useEffect(() => {
     if (!search.trim()) {
       setFiltered(data);
@@ -62,7 +83,6 @@ const ListBonScreen = () => {
     }
   }, [search, data]);
 
-  // Calcul simple d'état par rapport à aujourd'hui
   const computeEtat = (dateStr) => {
     if (!dateStr) return 'inconnu';
     const mDate = new Date(dateStr);
@@ -74,8 +94,7 @@ const ListBonScreen = () => {
     return 'ulterieur';
   };
 
-  // Format de date français
-  const formatDate = (dateStr) => {
+  const formatDate = (dateStr: string) => {
     if (!dateStr) return 'N/A';
     return new Date(dateStr).toLocaleString('fr-FR', {
       day: '2-digit',
@@ -85,20 +104,6 @@ const ListBonScreen = () => {
       minute: '2-digit',
     });
   };
-
-  const getEtatColor = (etat : string) => {
-    switch (etat) {
-      case 'aujourdhui':
-        return '#28a745';
-      case 'anterieur':
-        return '#dc3545';
-      case 'ulterieur':
-        return '#ffc107';
-      default:
-        return '#007bff';
-    }
-  };
-
 
   if (loading) {
     return (

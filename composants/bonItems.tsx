@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type StatusKey =
@@ -42,7 +42,6 @@ const BonItem = ({ item, openModal, formatDate, styles }: BonItemProps) => {
 
   return (
     <View style={styles.card}>
-      {/* En-tête avec icône et statut */}
       <View style={styles.headerRow}>
         <Text style={styles.title}>
           <MaterialCommunityIcons name="file-document" size={18} color="#007AFF" />

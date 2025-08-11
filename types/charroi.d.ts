@@ -57,6 +57,8 @@ export interface BonSortie {
   prenom_chauffeur:string;
   destination:string;
   motif: string;
+  nom_statut_bs: string;
+  retour_time: string;
 }
 
 export interface AffectationItem {
