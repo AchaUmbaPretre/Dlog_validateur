@@ -1,5 +1,6 @@
 import { getAffectationDemande } from '@/services/charroiService';
 import { AffectationItem } from '@/types';
+import { useRouter } from 'expo-router'; // <-- import router
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
@@ -7,11 +8,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ListCourseScreen = () => {
+  const router = useRouter();  // <-- init router
   const [data, setData] = useState<AffectationItem[]>([]);
   const [filtered, setFiltered] = useState<AffectationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +60,13 @@ const ListCourseScreen = () => {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+    });
+  };
+
+  const handleGoToBonSortie = (id: number) => {
+    router.push({
+      pathname: '/screens/bonSortieScreen',
+      params: { affectationId: String(id) },
     });
   };
 
@@ -116,6 +126,15 @@ const ListCourseScreen = () => {
           {item.commentaire || 'Aucun commentaire'}
         </Text>
       </View>
+
+      {/* Bouton navigation */}
+      <TouchableOpacity
+        style={styles.boutonBonSortie}
+        onPress={() => handleGoToBonSortie(item.id_affectation_demande)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.boutonBonSortieText}>Voir bon de sortie</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -214,5 +233,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  boutonBonSortie: {
+    marginTop: 14,
+    paddingVertical: 10,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  boutonBonSortieText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
