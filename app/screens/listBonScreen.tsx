@@ -1,13 +1,27 @@
+import BonItems from '@/composants/bonItems';
 import { getBandeSortie } from '@/services/charroiService';
+import { BonSortie } from '@/types';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ListBonScreen = () => {
-  const [data, setData] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [data, setData] = useState<any>([]);
+  const [filtered, setFiltered] = useState<BonSortie>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedBon, setSelectedBon] = useState<BonSortie | null>(null);
+
+  const openModal = (bon) => {
+    setSelectedBon(bon);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedBon(null);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,7 +32,6 @@ const ListBonScreen = () => {
           ...item,
           etat: computeEtat(item.date_prevue),
           dateHeureDepart: formatDate(item.date_prevue),
-          // Tu peux ajouter ici d'autres formats ou conversions si besoin
         }));
         setData(fetchedData);
         setFiltered(fetchedData);
@@ -86,62 +99,6 @@ const ListBonScreen = () => {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>
-          <MaterialCommunityIcons name="file-document" size={18} color="#007AFF" /> Bon #{item.id_bande_sortie || item.id}
-        </Text>
-        <Text style={[styles.etat, { backgroundColor: getEtatColor(item.etat) }]}>
-          {item.etat}
-        </Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
-        <Text style={styles.text}>
-          Marque & véhicule : {item.nom_marque} ({item.immatriculation})
-        </Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
-        <Text style={styles.text}>Chauffeur : {item.nom_chauffeur || item.nom}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
-        <Text style={styles.text}>Départ : {item.dateHeureDepart}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
-        <Text style={styles.text}>Destination : {item.nom_destination || item.destination}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
-        <Text style={styles.text}>Motif : {item.nom_motif_demande || item.motif}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
-        <Text style={styles.text}>Service : {item.nom_service || item.service}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
-        <Text style={styles.text}>A bord : {item.personne_bord || item.personnesABord}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="note-text" size={18} color="#007AFF" />
-        <Text style={[styles.text, { fontStyle: 'italic' }]}>
-          {item.commentaire || 'Aucun commentaire'}
-        </Text>
-      </View>
-    </View>
-  );
 
   if (loading) {
     return (
@@ -166,13 +123,187 @@ const ListBonScreen = () => {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item, index) => (item.id_bande_sortie || item.id || index).toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Aucun bon de sortie trouvé.</Text>
-        }
-        contentContainerStyle={filtered.length === 0 && { flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        keyExtractor={(item) => (item.id_bande_sortie).toString()}
+        renderItem={({ item }) => (
+          <BonItems
+            item={item}
+            openModal={openModal}
+            formatDate={formatDate}
+            styles={styles}
+          />
+        )}
+        initialNumToRender={10}
+        windowSize={5}
       />
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              {selectedBon ? (
+                <>
+                  <Text style={styles.modalTitle}>Détail du Bon #{selectedBon.id_bande_sortie}</Text>
+
+                  {/* Statut avec badge coloré */}
+                  <View style={[styles.detailRow, { marginBottom: 15 }]}>
+                    <MaterialCommunityIcons name="clipboard-text" size={22} color="#007AFF" />
+                    <View style={[styles.statusBadgeModal, { backgroundColor: statusIcons[selectedBon.nom_statut_bs]?.color || '#777' }]}>
+                      <Text style={styles.statusTextModal}>{selectedBon.nom_statut_bs}</Text>
+                    </View>
+                  </View>
+
+                  {/* Véhicule */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      {selectedBon.nom_marque} ({selectedBon.immatriculation})
+                    </Text>
+                  </View>
+
+                  {/* Chauffeur */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="account" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      {selectedBon.nom} {selectedBon.prenom_chauffeur}
+                    </Text>
+                  </View>
+
+                  {/* Date prévue */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Date prévue : {new Date(selectedBon.date_prevue).toLocaleString('fr-FR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </View>
+
+                  {/* Sortie réelle ou prévue */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="exit-run" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Sortie : {selectedBon.sortie_time
+                        ? new Date(selectedBon.sortie_time).toLocaleString('fr-FR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : `Prévue ${new Date(selectedBon.date_prevue).toLocaleString('fr-FR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}`}
+                    </Text>
+                  </View>
+
+                  {/* Date retour prévue */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Date retour prévue : {selectedBon.date_retour ? new Date(selectedBon.date_retour).toLocaleString('fr-FR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }) : 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Retour réel ou prévu */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="exit-to-app" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Retour : {selectedBon.retour_time
+                        ? new Date(selectedBon.retour_time).toLocaleString('fr-FR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : selectedBon.date_retour
+                        ? `Prévue ${new Date(selectedBon.date_retour).toLocaleString('fr-FR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}`
+                        : 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Destination */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="map-marker" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Destination : {selectedBon.nom_destination || selectedBon.destination || 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Motif */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="clipboard-check" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Motif : {selectedBon.nom_motif_demande || selectedBon.motif || 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Service demandeur */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="office-building" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Service : {selectedBon.nom_service || 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Personne à bord */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="account-group" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Personne à bord : {selectedBon.personne_bord || 'N/A'}
+                    </Text>
+                  </View>
+
+                  {/* Commentaire */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="comment-text" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Commentaire : {selectedBon.commentaire || 'Aucun'}
+                    </Text>
+                  </View>
+
+                  {/* Créé par */}
+                  <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="account" size={20} color="#007AFF" />
+                    <Text style={styles.detailText}>
+                      Créé par : {selectedBon.created || 'N/A'}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>Fermer</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -201,6 +332,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
   },
+  eyeIconContainer: {
+  marginLeft: 12,
+  padding: 4,
+},
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -208,6 +343,20 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     elevation: 3,
   },
+  statusBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  borderRadius: 20,
+},
+statusText: {
+  color: '#fff',
+  fontSize: 12,
+  fontWeight: 'bold',
+  marginLeft: 5,
+},
+
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -220,14 +369,16 @@ const styles = StyleSheet.create({
     color: '#222',
   },
   etat: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#fff',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    textTransform: 'capitalize',
-  },
+  fontSize: 12,
+  fontWeight: '700',
+  color: '#fff',
+  paddingVertical: 4,
+  paddingHorizontal: 10,
+  borderRadius: 20,
+  overflow: 'hidden',
+  textTransform: 'capitalize',
+  elevation: 2,
+},
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,4 +399,76 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+arrowButton: {
+  backgroundColor: '#e6f0ff',
+  borderRadius: 20,
+  padding: 6,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginLeft: 12,
+  shadowColor: '#007AFF',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 3,
+  elevation: 2,
+},
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: '80%',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  statusBadgeModal: {
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+  borderRadius: 15,
+  marginLeft: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+statusTextModal: {
+  color: 'white',
+  fontWeight: '700',
+  fontSize: 14,
+},
+
+detailRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 12,
+},
+
+detailText: {
+  marginLeft: 10,
+  fontSize: 16,
+  color: '#333',
+},
+
+closeButton: {
+  marginTop: 25,
+  backgroundColor: '#007AFF',
+  borderRadius: 10,
+  paddingVertical: 14,
+  alignItems: 'center',
+},
+
+closeButtonText: {
+  color: 'white',
+  fontSize: 16,
+  fontWeight: '600',
+},
 });

@@ -52,6 +52,11 @@ export interface BonSortie {
   date_retour: string;
   immatriculation: string;
   user_cr: string;
+  nom_motif_demande: string;
+  nom_statut_bs: string;
+  prenom_chauffeur:string;
+  destination:string;
+  motif: string;
 }
 
 export interface AffectationItem {

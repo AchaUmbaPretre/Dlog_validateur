@@ -125,9 +125,11 @@ const Plus = () => {
           <View style={styles.header}>
             <View style={styles.profileContainer}>
               <View style={styles.avatarCircle}>
-                {(user?.nom || '').substring(0, 2).toUpperCase()}
-            </View>
-              <View>
+                <Text style={styles.avatarText}>
+                  {(user?.nom || '').substring(0, 2).toUpperCase()}
+                </Text>
+              </View>
+            <View>
             <Text variant="titleMedium">{user?.nom}</Text>
             <Text variant="bodySmall" style={{ color: '#777' }}>{user?.role}</Text>
           </View>
