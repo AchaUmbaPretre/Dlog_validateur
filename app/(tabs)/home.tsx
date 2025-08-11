@@ -137,7 +137,6 @@ const Home = () => {
     <View style={styles.safeArea}>
       <ScrollView style={styles.container}>
         
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.profileContainer}>
             <View style={styles.avatarCircle}>
@@ -160,15 +159,12 @@ const Home = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Welcome Title */}
         <Text style={styles.title}>👋 Bienvenue sur DLOG</Text>
 
-        {/* Banner Image */}
         <Card style={styles.imageCard}>
           <Image source={Images.backIcon} style={styles.backImage} />
         </Card>
 
-        {/* Section Title */}
         <Text style={styles.sectionTitle}>
           <MaterialCommunityIcons name="file-document-multiple" size={20} color="#333" /> Liste des bons de sortie
         </Text>
