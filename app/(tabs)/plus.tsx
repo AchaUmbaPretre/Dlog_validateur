@@ -82,12 +82,12 @@ const Plus = () => {
       bgColor: 'rgba(52, 199, 89, 0.1)',
       modalKey: 'listCourse',
     },
-    {
+/*     {
       label: 'Bon de sortie',
       icon: Images.bonIcon,
       bgColor: 'rgba(255, 149, 0, 0.1)',
       modalKey: 'bon',
-    },
+    }, */
     {
       label: 'Liste des bons',
       icon: Images.listBonIcon,
