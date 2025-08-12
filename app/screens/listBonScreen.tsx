@@ -1,6 +1,7 @@
 import BonItems from '@/composants/bonItems';
 import { getBandeSortie } from '@/services/charroiService';
-import { BonSortie, StatusConfig, StatusKey } from '@/types';
+import { BonSortie } from '@/types';
+import { getStatutBS } from '@/utils/statutIcon';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,16 +24,6 @@ const ListBonScreen = () => {
     setSelectedBon(null);
   };
 
-  const statusIcons: Record<StatusKey, StatusConfig> = {
-  "En attente d'affectation": { icon: "clock-outline", color: "#ffc107" },
-  "Véhicule affecté": { icon: "car", color: "#17a2b8" },
-  "En attente de validation du BS": { icon: "clipboard-clock-outline", color: "#6f42c1" },
-  "BS validé": { icon: "check-circle-outline", color: "#28a745" },
-  "En cours": { icon: "progress-clock", color: "#007bff" },
-  "Sorti": { icon: "exit-run", color: "#28a745" },
-  "Retourné": { icon: "exit-to-app", color: "#dc3545" },
-  "Annulé": { icon: "close-circle-outline", color: "#6c757d" },
-};
 
 useEffect(() => {
   let isMounted = true;
@@ -153,14 +144,22 @@ useEffect(() => {
               {selectedBon ? (
                 <>
                   <Text style={styles.modalTitle}>Détail du Bon #{selectedBon.id_bande_sortie}</Text>
-
-                  <View style={[styles.detailRow, { marginBottom: 15 }]}>
-                    <MaterialCommunityIcons name="clipboard-text" size={22} color="#007AFF" />
-                    <View style={[styles.statusBadgeModal, { backgroundColor: statusIcons[selectedBon.nom_statut_bs]?.color || '#777' }]}>
-                      <Text style={styles.statusTextModal}>{selectedBon.nom_statut_bs}</Text>
-                    </View>
+                  <View style={[styles.detailRow, { marginBottom: 15, alignItems: 'center' }]}>
+                  <MaterialCommunityIcons
+                    name={getStatutBS(selectedBon.nom_statut_bs).icon}
+                    size={22}
+                    color={getStatutBS(selectedBon.nom_statut_bs).color}
+                    style={{ marginRight: 8 }}
+                  />
+                  <View
+                    style={[
+                      styles.statusBadgeModal,
+                      { backgroundColor: getStatutBS(selectedBon.nom_statut_bs).color || '#777' },
+                    ]}
+                  >
+                    <Text style={styles.statusTextModal}>{selectedBon.nom_statut_bs}</Text>
                   </View>
-
+                </View>
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="car" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
@@ -403,6 +402,7 @@ arrowButton: {
   shadowOpacity: 0.15,
   shadowRadius: 3,
   elevation: 2,
+  marginTop:10,
 },
 
   modalOverlay: {

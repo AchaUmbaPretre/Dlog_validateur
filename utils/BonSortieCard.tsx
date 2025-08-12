@@ -1,8 +1,10 @@
 import { BonSortie } from '@/types';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import moment from 'moment';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
+import { getStatutBS } from './statutIcon';
 
 type Props = {
   data: {
@@ -14,13 +16,18 @@ type Props = {
     dateHeurePrevue?: string;
     prenom_chauffeur: string;
     user_cr: string;
+    nom_statut_bs: string;
+    sortie_time?: string;
+    retour_time?: string;
     etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
 
   };
   onFinish: (d: BonSortie) => void;
+  onViewDetail: (d: BonSortie) => void;
+
 };
 
-export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
+export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail }) => {
   const getEtatColor = () => {
   switch (data.etat) {
     case 'aujourdhui':
@@ -33,6 +40,21 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
       return '#007bff';
   }
 };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '—';
+    return moment(dateString).format('HH:mm - DD/MM/YYYY');
+  };
+
+  const renderHeure = () => {
+    if (data.retour_time) {
+      return { label: 'Heure retour', value: formatDate(data.retour_time), color: '#28a745' };
+    }
+    if (data.sortie_time) {
+      return { label: 'Heure sortie', value: formatDate(data.sortie_time), color: '#007bff' };
+    }
+    return { label: 'Heure prévue', value: formatDate(data.dateHeurePrevue), color: '#17a2b8' };
+  };
 
 
   return (
@@ -66,25 +88,52 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
           <Text style={styles.value}>{data.immatriculation}</Text>
         </View>
 
-        {/* Heure prévue */}
+        {/* Heure (prévue, sortie ou retour) */}
         <View style={styles.row}>
-          <Feather name="clock" size={20} color="#17a2b8" />
-          <Text style={styles.label}>Heure prévue :</Text>
-          <Text style={styles.value}>{data.dateHeurePrevue}</Text>
+          <Feather name="clock" size={20} color={renderHeure().color} />
+          <Text style={styles.label}>{renderHeure().label} :</Text>
+          <Text style={[styles.value, { color: renderHeure().color }]}>
+            {renderHeure().value}
+          </Text>
         </View>
+
+
+        {/* Statut BS */}
+        <View style={styles.row}>
+          <MaterialCommunityIcons
+            name={getStatutBS(data.nom_statut_bs).icon as any}
+            size={20}
+            color={getStatutBS(data.nom_statut_bs).color}
+          />
+          <Text style={styles.label}>Statut :</Text>
+          <Text style={[styles.value, { color: getStatutBS(data.nom_statut_bs).color }]}>
+            {data.nom_statut_bs}
+          </Text>
+        </View>
+
 
         {/* Createur */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#28a745" />
-          <Text style={styles.label}>Crée par  :</Text>
+          <Text style={styles.label}>Créé par  :</Text>
           <Text style={styles.value}>{data.user_cr}</Text>
         </View>
+        
+        <View  style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }} >
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#6c757d', marginRight: 8 }]}
+            onPress={() => onViewDetail(data)}
+          >
+            <Feather name="eye" size={18} color="#fff" />
+            <Text style={styles.buttonText}>Voir</Text>
+          </TouchableOpacity>
 
-        {/* Bouton Valider */}
-        <TouchableOpacity style={styles.button} onPress={() => onFinish(data as BonSortie)}>
-          <Feather name="check-circle" size={18} color="#fff" />
-          <Text style={styles.buttonText}>Valider</Text>
-        </TouchableOpacity>
+          {/* Bouton Valider */}
+          <TouchableOpacity style={styles.button} onPress={() => onFinish(data as BonSortie)}>
+            <Feather name="check-circle" size={18} color="#fff" />
+            <Text style={styles.buttonText}>Valider</Text>
+          </TouchableOpacity>
+        </View>
       </Card.Content>
     </Card>
   );

@@ -4,7 +4,7 @@ import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiS
 import { BonSortie } from '@/types';
 import { BonSortieCard } from '@/utils/BonSortieCard';
 import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Entypo, Feather, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -32,6 +33,13 @@ const Home = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBon, setSelectedBon] = useState<BonSortie | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleViewDetail = (bon: BonSortie) => {
+    setSelectedBon(bon);
+    setModalVisible(true);
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -166,7 +174,7 @@ const Home = () => {
         </Card>
 
         <Text style={styles.sectionTitle}>
-          <MaterialCommunityIcons name="file-document-multiple" size={20} color="#333" /> Liste des bons de sortie
+          <MaterialCommunityIcons name="file-document-multiple" size={20} color="#333" /> En attente de validation
         </Text>
 
         <TextInput
@@ -232,6 +240,7 @@ const Home = () => {
                         immatriculation: item.immatriculation || 'N/A',
                       }}
                       onFinish={onFinish}
+                      onViewDetail={handleViewDetail}
                     />
                   ))}
                 </View>
@@ -264,6 +273,96 @@ const Home = () => {
           {snackbarMessage}
         </Snackbar>
       </View>
+
+        {selectedBon && (
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              justifyContent: 'center',
+              padding: 20
+            }}>
+              <View style={{
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                padding: 20,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 5,
+              }}>
+                <Text style={{
+                  fontWeight: 'bold',
+                  fontSize: 20,
+                  marginBottom: 15,
+                  color: '#007bff',
+                }}>
+                  <FontAwesome5 name="file-alt" size={20} color="#007bff" />  Détails du bon
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <Entypo name="location-pin" size={16} color="#28a745" /> <Text style={{ fontWeight: 'bold' }}>Destination :</Text> {selectedBon.nom_destination}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <FontAwesome5 name="user-tie" size={16} color="#17a2b8" /> <Text style={{ fontWeight: 'bold' }}>Chauffeur :</Text> {selectedBon.nom_chauffeur} {selectedBon.prenom_chauffeur}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <FontAwesome5 name="car-side" size={16} color="#6c757d" /> <Text style={{ fontWeight: 'bold' }}>Véhicule :</Text> {selectedBon.nom_marque}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <FontAwesome5 name="id-card" size={16} color="#ffc107" /> <Text style={{ fontWeight: 'bold' }}>Immatriculation :</Text> {selectedBon.immatriculation}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <MaterialIcons name="work-outline" size={16} color="#20c997" /> <Text style={{ fontWeight: 'bold' }}>Service :</Text> {selectedBon.nom_service}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <Ionicons name="calendar-outline" size={16} color="#007bff" /> <Text style={{ fontWeight: 'bold' }}>Date prévue :</Text> {moment(selectedBon.date_prevue).format('DD-MM-YYYY HH:mm')}
+                </Text>
+
+                {selectedBon.sortie_time && (
+                  <Text style={{ marginBottom: 10 }}>
+                    <FontAwesome5 name="sign-out-alt" size={16} color="#fd7e14" /> <Text style={{ fontWeight: 'bold' }}>Sortie :</Text> {moment(selectedBon.sortie_time).format('DD-MM-YYYY HH:mm')}
+                  </Text>
+                )}
+
+                {selectedBon.retour_time && (
+                  <Text style={{ marginBottom: 10 }}>
+                    <FontAwesome5 name="sign-in-alt" size={16} color="#6610f2" /> <Text style={{ fontWeight: 'bold' }}>Retour :</Text> {moment(selectedBon.retour_time).format('DD-MM-YYYY HH:mm')}
+                  </Text>
+                )}
+
+                <Text style={{ marginBottom: 10 }}>
+                  <Ionicons name="person-circle-outline" size={16} color="#6f42c1" /> <Text style={{ fontWeight: 'bold' }}>Créé par :</Text> {selectedBon.user_cr}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={{
+                    marginTop: 20,
+                    backgroundColor: '#007bff',
+                    padding: 12,
+                    borderRadius: 8,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fermer</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
+
 
     </View>
   );

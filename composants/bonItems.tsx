@@ -1,3 +1,4 @@
+import { getStatutBS } from '@/utils/statutIcon';
 import React, { memo } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -36,10 +37,7 @@ interface BonItemProps {
 }
 
 const BonItem = ({ item, openModal, formatDate, styles }: BonItemProps) => {
-  const statusKey = (item?.nom_statut_bs?.trim() || "") as StatusKey;
-  const statusConfig: StatusConfig =
-    statusIcons[statusKey] || { icon: "help-circle-outline", color: "grey" };
-
+const statusConfig = getStatutBS(item.nom_statut_bs);
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
@@ -47,10 +45,16 @@ const BonItem = ({ item, openModal, formatDate, styles }: BonItemProps) => {
           <MaterialCommunityIcons name="file-document" size={18} color="#007AFF" />
           Bon #{item.id_bande_sortie || item.id}
         </Text>
-        <View style={[styles.statusBadge, { backgroundColor: statusConfig.color }]}>
-          <MaterialCommunityIcons name={statusConfig.icon} size={16} color="#fff" />
-          <Text style={styles.statusText}>{item.nom_statut_bs}</Text>
-        </View>
+      <View style={[styles.statusBadge, { backgroundColor: statusConfig.color || '#777' }]}>
+        <MaterialCommunityIcons
+          name={statusConfig.icon}
+          size={16}
+          color="#fff"
+          style={{ marginRight: 4 }}
+        />
+        <Text style={styles.statusText}>{item.nom_statut_bs}</Text>
+      </View>
+
       </View>
 
       {/* Informations véhicule */}
