@@ -75,4 +75,5 @@ export interface AffectationItem {
   nom_destination: string
   commentaire: string
   personne_bord: string
+  nom_statut_bs: string
 }

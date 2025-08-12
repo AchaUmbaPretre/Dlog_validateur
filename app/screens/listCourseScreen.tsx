@@ -1,9 +1,11 @@
 import { getAffectationDemande } from '@/services/charroiService';
 import { AffectationItem } from '@/types';
-import { useRouter } from 'expo-router'; // <-- import router
+import { AntDesign } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
+  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -14,11 +16,11 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ListCourseScreen = () => {
-  const router = useRouter();  // <-- init router
   const [data, setData] = useState<AffectationItem[]>([]);
   const [filtered, setFiltered] = useState<AffectationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,77 +68,86 @@ const ListCourseScreen = () => {
   const handleGoToBonSortie = (id: number) => {
     router.push({
       pathname: '/screens/bonSortieScreen',
-      params: { affectationId: String(id) },
+      params: { affectationId: String(id) }
     });
   };
 
-  const renderItem = ({ item }: { item: AffectationItem }) => (
-    <View style={styles.card}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>
-          <MaterialCommunityIcons name="car-multiple" size={18} color="#007AFF" /> Course #{item.id_affectation_demande}
-        </Text>
-      </View>
+  const renderItem = ({ item }: { item: AffectationItem }) => {
+    const isBSValide = item.nom_statut_bs === "BS validé";
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
-        <Text style={styles.text}>
-          Marque : {item.nom_marque} ({item.immatriculation})
-        </Text>
-      </View>
+    return (
+      <View style={styles.card}>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>
+            <MaterialCommunityIcons name="car-multiple" size={18} color="#007AFF" /> Course #{item.id_affectation_demande}
+          </Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
-        <Text style={styles.text}>Chauffeur : {item.nom}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="car" size={18} color="#007AFF" />
+          <Text style={styles.text}>
+            Marque : {item.nom_marque} ({item.immatriculation})
+          </Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
-        <Text style={styles.text}>Départ : {formatDate(item.date_prevue)}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
+          <Text style={styles.text}>Chauffeur : {item.nom}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="calendar-end" size={18} color="#007AFF" />
-        <Text style={styles.text}>Retour : {formatDate(item.date_retour)}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="calendar-start" size={18} color="#007AFF" />
+          <Text style={styles.text}>Départ : {formatDate(item.date_prevue)}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
-        <Text style={styles.text}>Destination : {item.nom_destination}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="calendar-end" size={18} color="#007AFF" />
+          <Text style={styles.text}>Retour : {formatDate(item.date_retour)}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
-        <Text style={styles.text}>Motif : {item.nom_motif_demande}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="map-marker" size={18} color="#007AFF" />
+          <Text style={styles.text}>Destination : {item.nom_destination}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
-        <Text style={styles.text}>Service : {item.nom_service}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="clipboard-text" size={18} color="#007AFF" />
+          <Text style={styles.text}>Motif : {item.nom_motif_demande}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
-        <Text style={[styles.text, { fontWeight: '600' }]}>A bord : {item.personne_bord}</Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="office-building" size={18} color="#007AFF" />
+          <Text style={styles.text}>Service : {item.nom_service}</Text>
+        </View>
 
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="note-text" size={18} color="#007AFF" />
-        <Text style={[styles.text, { fontStyle: 'italic' }]}>
-          {item.commentaire || 'Aucun commentaire'}
-        </Text>
-      </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="account-multiple" size={18} color="#007AFF" />
+          <Text style={[styles.text, { fontWeight: '600' }]}>A bord : {item.personne_bord}</Text>
+        </View>
 
-      {/* Bouton navigation */}
-      <TouchableOpacity
-        style={styles.boutonBonSortie}
-        onPress={() => handleGoToBonSortie(item.id_affectation_demande)}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.boutonBonSortieText}>Voir bon de sortie</Text>
-      </TouchableOpacity>
-    </View>
-  );
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="note-text" size={18} color="#007AFF" />
+          <Text style={[styles.text, { fontStyle: 'italic' }]}>
+            {item.commentaire || 'Aucun commentaire'}
+          </Text>
+        </View>
+
+        {isBSValide ? (
+          <View style={[styles.boutonBonSortie, styles.boutonDesactive]}>
+            <Text style={[styles.boutonBonSortieText, { color: '#888' }]}>Bon de sortie validé</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.boutonBonSortie}
+            onPress={() => handleGoToBonSortie(item.id_affectation_demande)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.boutonBonSortieText}>Voir bon de sortie</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   if (loading) {
     return (
@@ -148,6 +159,9 @@ const ListCourseScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Pressable style={styles.backButton} onPress={() => router.back()}>
+        <AntDesign name="arrowleft" size={24} color="#007AFF" />
+      </Pressable>
       <View style={styles.searchContainer}>
         <MaterialCommunityIcons name="magnify" size={20} color="#666" />
         <TextInput
@@ -175,6 +189,12 @@ const ListCourseScreen = () => {
 export default ListCourseScreen;
 
 const styles = StyleSheet.create({
+  backButton: {
+    marginBottom: 16,
+    marginTop: 10,
+    paddingLeft: 4,
+    alignSelf: "flex-start",
+  },
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
@@ -235,15 +255,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   boutonBonSortie: {
-    marginTop: 14,
+    marginTop: 16,
+    backgroundColor: '#007AFF',
     paddingVertical: 10,
-    backgroundColor: '#2563EB',
     borderRadius: 8,
     alignItems: 'center',
   },
   boutonBonSortieText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
+  },
+  boutonDesactive: {
+    backgroundColor: '#e0e0e0',
   },
 });

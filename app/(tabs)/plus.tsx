@@ -1,6 +1,9 @@
 import { Images } from '@/assets/images';
+import { logout } from '@/redux/authSlice';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -28,7 +31,7 @@ const Plus = () => {
   const [modalType, setModalType] = useState<ModalType>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-
+  const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth?.currentUser);
 

@@ -229,7 +229,7 @@ const Home = () => {
                         dateHeurePrevue: item.date_prevue
                           ? moment.utc(item.date_prevue).format('DD-MM-YYYY HH:mm')
                           : '',
-                        immatriculation: item.immatriculation || 'N/A', // ajout
+                        immatriculation: item.immatriculation || 'N/A',
                       }}
                       onFinish={onFinish}
                     />

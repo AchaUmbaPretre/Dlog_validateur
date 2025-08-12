@@ -12,6 +12,7 @@ type Props = {
     nom_marque: string;
     immatriculation: string;
     dateHeurePrevue?: string;
+    prenom_chauffeur: string;
     user_cr: string;
     etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
 
@@ -23,13 +24,13 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
   const getEtatColor = () => {
   switch (data.etat) {
     case 'aujourdhui':
-      return '#28a745'; // vert = aujourd'hui
+      return '#28a745';
     case 'anterieur':
-      return '#dc3545'; // rouge = passé
+      return '#dc3545';
     case 'ulterieur':
-      return '#ffc107'; // jaune = futur
+      return '#ffc107';
     default:
-      return '#007bff'; // bleu par défaut
+      return '#007bff';
   }
 };
 
@@ -38,7 +39,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
     <Card style={[styles.card, { borderLeftColor: getEtatColor() }]}>
       <Card.Content>
 
-        {/* Destination */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="map-marker" size={20} color="#007bff" />
           <Text style={styles.label}>Destination :</Text>
@@ -49,7 +49,7 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish }) => {
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#28a745" />
           <Text style={styles.label}>Chauffeur :</Text>
-          <Text style={styles.value}>{data.nom_chauffeur}</Text>
+          <Text style={styles.value}>{data.nom_chauffeur} {data.prenom_chauffeur}</Text>
         </View>
 
         {/* Véhicule */}
