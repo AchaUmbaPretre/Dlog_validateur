@@ -29,17 +29,17 @@ type Props = {
 
 export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail }) => {
   const getEtatColor = () => {
-  switch (data.etat) {
-    case 'aujourdhui':
-      return '#28a745';
-    case 'anterieur':
-      return '#dc3545';
-    case 'ulterieur':
-      return '#ffc107';
-    default:
-      return '#007bff';
-  }
-};
+    switch (data.etat) {
+      case 'aujourdhui':
+        return '#28a745';
+      case 'anterieur':
+        return '#dc3545';
+      case 'ulterieur':
+        return '#ffc107';
+      default:
+        return '#007bff';
+    }
+  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '—';
@@ -97,7 +97,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
-
         {/* Statut BS */}
         <View style={styles.row}>
           <MaterialCommunityIcons
@@ -111,7 +110,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
-
         {/* Createur */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#28a745" />
@@ -119,7 +117,7 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           <Text style={styles.value}>{data.user_cr}</Text>
         </View>
         
-        <View  style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }} >
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }} >
           <TouchableOpacity
             style={[styles.button, { backgroundColor: '#6c757d', marginRight: 8 }]}
             onPress={() => onViewDetail(data)}
@@ -128,8 +126,7 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
             <Text style={styles.buttonText}>Voir</Text>
           </TouchableOpacity>
 
-          {/* Bouton Valider */}
-          <TouchableOpacity style={styles.button} onPress={() => onFinish(data as BonSortie)}>
+          <TouchableOpacity style={styles.button} onPress={() => onFinish(data)}>
             <Feather name="check-circle" size={18} color="#fff" />
             <Text style={styles.buttonText}>Valider</Text>
           </TouchableOpacity>
