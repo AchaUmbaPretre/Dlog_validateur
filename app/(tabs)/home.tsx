@@ -106,11 +106,9 @@ const Home = () => {
   }, []);
 
   const onFinish = (d: BonSortie): void => {
-    const heure = new Date(d.date_prevue).toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+    const heure = d.date_prevue
+      ? moment(d.date_prevue).format('HH:mm')
+      : '—';
 
     const message = `🚚 Destination : ${d.nom_destination}\n👨‍✈️ Chauffeur : ${d.nom_chauffeur}\n🚗 Marque : ${d.nom_marque}\n🕒 Heure prévue : ${heure}\n\nSouhaitez-vous valider ce bon ?`;
 
@@ -199,8 +197,8 @@ const Home = () => {
             ['aujourdhui', 'ultérieur', 'antérieur'].map((etat) => {
               const filtered = bon
               .filter((item) => {
-                const datePrevue = moment.utc(item.date_prevue);
-                const today = moment.utc().startOf('day');
+                const datePrevue = moment(item.date_prevue);
+                const today = moment().startOf('day');
 
                 if (etat === 'aujourdhui') return datePrevue.isSame(today, 'day');
                 if (etat === 'antérieur') return datePrevue.isBefore(today, 'day');
@@ -232,7 +230,7 @@ const Home = () => {
                       data={{
                         ...item,
                         dateHeurePrevue: item.date_prevue
-                          ? moment.utc(item.date_prevue).format('DD-MM-YYYY HH:mm')
+                          ? moment(item.date_prevue).format('DD-MM-YYYY HH:mm')
                           : '',
                         immatriculation: item.immatriculation || 'N/A',
                       }}
@@ -323,6 +321,10 @@ const Home = () => {
                 </Text>
 
                 <Text style={{ marginBottom: 10 }}>
+                  <MaterialCommunityIcons name="clipboard-check" size={20} color="#007AFF" /> <Text style={{ fontWeight: 'bold' }}>Motif :</Text> {selectedBon.nom_motif_demande || 'N/A'}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
                   <Ionicons name="calendar-outline" size={16} color="#007bff" /> <Text style={{ fontWeight: 'bold' }}>Date prévue :</Text> {moment(selectedBon.date_prevue).format('DD-MM-YYYY HH:mm')}
                 </Text>
 
@@ -337,6 +339,13 @@ const Home = () => {
                     <FontAwesome5 name="sign-in-alt" size={16} color="#6610f2" /> <Text style={{ fontWeight: 'bold' }}>Retour :</Text> {moment(selectedBon.retour_time).format('DD-MM-YYYY HH:mm')}
                   </Text>
                 )}
+                <Text style={{ marginBottom: 10 }}>
+                  <MaterialCommunityIcons name="comment-text" size={16} color="#007AFF" /> <Text style={{ fontWeight: 'bold' }}>Commentaire :</Text> {selectedBon.commentaire || 'N/A'}
+                </Text>
+
+                <Text style={{ marginBottom: 10 }}>
+                  <MaterialCommunityIcons name="account-group" size={20} color="#007AFF" /> <Text style={{ fontWeight: 'bold' }}>Personne à bord :</Text> {selectedBon.personne_bord || 'N/A'}
+                </Text>
 
                 <Text style={{ marginBottom: 10 }}>
                   <Ionicons name="person-circle-outline" size={16} color="#6f42c1" /> <Text style={{ fontWeight: 'bold' }}>Créé par :</Text> {selectedBon.user_cr}
@@ -368,74 +377,65 @@ export default Home;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9FAFB', // gris clair pro
   },
   container: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
   },
   avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 23,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E8EDF7',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   logoIcon: {
-    width: '100%',
-    height:'100%'
-  },
-  avatarText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 15,
-    fontFamily: 'Inter-Bold',
-  },
-  userName: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Inter-SemiBold',
-    color: '#222',
-  },
-  userRole: {
-    fontSize: 11,
-    color: '#777',
-    fontFamily: 'Inter-Regular',
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
   },
   titleApp: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#011481'
+    fontWeight: '700',
+    color: '#011481',
+    fontFamily: 'Inter-Bold',
   },
   title: {
     marginVertical: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
     fontSize: 20,
     fontFamily: 'Inter-Bold',
-    color: '#111',
+    color: '#1F2937',
   },
   imageCard: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 3,
     marginBottom: 20,
     backgroundColor: '#fff',
-
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
   },
   backImage: {
     width: '100%',
-    height: 200,
+    height: 180,
     resizeMode: 'cover',
   },
   sectionTitle: {
@@ -443,16 +443,74 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 15,
     fontFamily: 'Inter-Bold',
-    color: '#333',
+    color: '#374151',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    fontSize: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
   },
   emptyState: {
     alignItems: 'center',
     marginTop: 40,
+  },
+  emptyText: {
+    color: '#9CA3AF',
+    marginTop: 8,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
   },
   groupTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
     fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontWeight: '700',
+    fontSize: 20,
+    marginBottom: 15,
+    color: '#2563EB',
+    fontFamily: 'Inter-Bold',
+  },
+  modalButton: {
+    marginTop: 20,
+    backgroundColor: '#2563EB',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

@@ -257,7 +257,6 @@ useEffect(() => {
                       Motif : {selectedBon.nom_motif_demande || selectedBon.motif || 'N/A'}
                     </Text>
                   </View>
-
                   <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="office-building" size={20} color="#007AFF" />
                     <Text style={styles.detailText}>
