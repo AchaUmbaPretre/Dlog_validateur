@@ -6,22 +6,30 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { getStatutBS } from './statutIcon';
 
-type Props = {
-  data: {
-    id_bon: number;
-    nom_destination: string;
-    nom_chauffeur: string;
-    nom_marque: string;
-    immatriculation: string;
-    dateHeurePrevue?: string;
-    prenom_chauffeur: string;
-    user_cr: string;
-    nom_statut_bs: string;
-    sortie_time?: string;
-    retour_time?: string;
-    etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
+type BonSortieDisplay = {
+  id_bande_sortie: number;
+  id_bon: number;
+  nom_destination: string;
+  nom_chauffeur: string;
+  nom_marque: string;
+  immatriculation: string;
+  dateHeurePrevue?: string;
+  prenom_chauffeur: string;
+  user_cr: string;
+  nom_statut_bs: string;
+  sortie_time?: string | undefined;
+  retour_time?: string | undefined;
+  date_retour:string;
+  date_prevue: string;
+  nom_motif_demande: string;
+  destination: string;
+  motif: string;
+  nom_cat: string;
+  etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
+};
 
-  };
+type Props = {
+  data: BonSortieDisplay;
   onFinish: (d: BonSortie) => void;
   onViewDetail: (d: BonSortie) => void;
 
@@ -56,39 +64,33 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
     return { label: 'Heure prévue', value: formatDate(data.dateHeurePrevue), color: '#17a2b8' };
   };
 
-
   return (
     <Card style={[styles.card, { borderLeftColor: getEtatColor() }]}>
       <Card.Content>
-
         <View style={styles.row}>
           <MaterialCommunityIcons name="map-marker" size={20} color="#007bff" />
           <Text style={styles.label}>Destination :</Text>
           <Text style={styles.value}>{data.nom_destination}</Text>
         </View>
 
-        {/* Chauffeur */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#28a745" />
           <Text style={styles.label}>Chauffeur :</Text>
           <Text style={styles.value}>{data.nom_chauffeur} {data.prenom_chauffeur}</Text>
         </View>
 
-        {/* Véhicule */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="car" size={20} color="#ffc107" />
           <Text style={styles.label}>Véhicule :</Text>
           <Text style={styles.value}>{data.nom_marque}</Text>
         </View>
 
-        {/* Immatriculation */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="card-text" size={20} color="#6f42c1" />
           <Text style={styles.label}>Immatriculation :</Text>
           <Text style={styles.value}>{data.immatriculation}</Text>
         </View>
 
-        {/* Heure (prévue, sortie ou retour) */}
         <View style={styles.row}>
           <Feather name="clock" size={20} color={renderHeure().color} />
           <Text style={styles.label}>{renderHeure().label} :</Text>
@@ -97,7 +99,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
-        {/* Statut BS */}
         <View style={styles.row}>
           <MaterialCommunityIcons
             name={getStatutBS(data.nom_statut_bs).icon as any}
@@ -110,7 +111,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
-        {/* Createur */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#28a745" />
           <Text style={styles.label}>Créé par  :</Text>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
-    borderLeftWidth: 6, // bande colorée
+    borderLeftWidth: 6,
   },
   row: {
     flexDirection: 'row',
