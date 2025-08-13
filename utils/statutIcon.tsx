@@ -11,6 +11,6 @@ export const getStatutBS = (statut?: string) => {
     case 'En attente':
       return { icon: 'clock', color: 'orange' };
     default:
-      return { icon: 'info', color: '#6c757d' };
+      return { icon: 'information', color: '#6c757d' };
   }
 };

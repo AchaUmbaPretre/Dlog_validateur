@@ -18,10 +18,8 @@ import {
 } from "react-native";
 import { Button, Card, Surface, Switch, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
-
 import { postAffectationDemande } from "@/services/charroiService";
 import BonSortieScreen from "./bonSortieScreen";
-
 import { useFetchData } from "@/hooks/useFetchData";
 import { RootState } from "@/store";
 import { FormState } from "@/types";
@@ -76,7 +74,6 @@ const CourseScreen: React.FC = () => {
   const [showPicker, setShowPicker] = useState<ShowPickerState | null>(null);
   const [searchVehicule, setSearchVehicule] = useState("");
   const [searchChauffeur, setSearchChauffeur] = useState("");
-
   const router = useRouter();
 
   const handleChange = (name: keyof FormState, value: any) => {
@@ -227,33 +224,32 @@ const CourseScreen: React.FC = () => {
     }
   };
 
-const renderDateTimePicker = (label: string, value: Date | null, onChange: (date: Date) => void) => (
-  <View style={styles.dateTimeField} key={label}>
-    <View style={{ flex: 1 }}>
-      <Text style={styles.label}>{label}</Text>
-      <Button
-        mode="outlined"
-        onPress={() => openPicker(label, value, onChange)}
-        style={styles.dateButton}
-        contentStyle={{ justifyContent: 'center' }}
+  const renderDateTimePicker = (label: string, value: Date | null, onChange: (date: Date) => void) => (
+    <View style={styles.dateTimeField} key={label}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.label}>{label}</Text>
+        <Button
+          mode="outlined"
+          onPress={() => openPicker(label, value, onChange)}
+          style={styles.dateButton}
+          contentStyle={{ justifyContent: 'center' }}
+        >
+          <Text style={styles.dateButtonText}>
+            {value ? value.toLocaleString() : "Choisir la date et l'heure"}
+          </Text>
+        </Button>
+      </View>
+
+      <TouchableOpacity
+        style={styles.todayButtonCompact}
+        onPress={() => onChange(new Date())}
+        activeOpacity={0.7}
+        accessibilityLabel={`Définir ${label} à aujourd'hui`}
       >
-        <Text style={styles.dateButtonText}>
-          {value ? value.toLocaleString() : "Choisir la date et l'heure"}
-        </Text>
-      </Button>
+        <Text style={styles.todayButtonTextCompact}>Aujourd'hui</Text>
+      </TouchableOpacity>
     </View>
-
-    <TouchableOpacity
-      style={styles.todayButtonCompact}
-      onPress={() => onChange(new Date())}
-      activeOpacity={0.7}
-      accessibilityLabel={`Définir ${label} à aujourd'hui`}
-    >
-      <Text style={styles.todayButtonTextCompact}>Aujourd'hui</Text>
-    </TouchableOpacity>
-  </View>
-);
-
+  );
 
   const onToggleSwitch = () => setCreateBS((prev) => !prev);
 
@@ -307,7 +303,6 @@ const renderDateTimePicker = (label: string, value: Date | null, onChange: (date
                       required
                     )
                   )}
-
                   <Text style={styles.label}>Personnes à bord</Text>
                   <TextInput
                     mode="outlined"
@@ -525,10 +520,10 @@ const styles = StyleSheet.create({
   marginLeft: 12,
   justifyContent: 'center',
   alignItems: 'center',
-},
-todayButtonTextCompact: {
-  color: "#2563EB",
-  fontWeight: "600",
-  fontSize: 13,
-},
+  },
+  todayButtonTextCompact: {
+    color: "#2563EB",
+    fontWeight: "600",
+    fontSize: 13,
+  },
 });

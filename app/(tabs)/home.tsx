@@ -4,7 +4,7 @@ import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiS
 import { BonSortie } from '@/types';
 import { BonSortieCard } from '@/utils/BonSortieCard';
 import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
-import { Entypo, Feather, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
@@ -148,33 +148,31 @@ const Home = () => {
         <View style={styles.header}>
           <View style={styles.profileContainer}>
             <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>
-                {(user?.nom || '').substring(0, 2).toUpperCase()}
-              </Text>
+              <Image source={Images.logoIcon} style={styles.logoIcon} />
             </View>
-            <View>
-              <Text style={styles.userName}>{user?.nom}</Text>
-              <Text style={styles.userRole}>{user?.role}</Text>
-            </View>
+          </View>
+
+          <View>
+            <Text style={styles.titleApp}>DLOG</Text>
           </View>
 
           <TouchableOpacity onPress={handleLogout}>
             {loading ? (
               <ActivityIndicator animating size={24} />
             ) : (
-              <Feather name="log-out" size={26} color="#d9534f" />
+              <AntDesign name="ellipsis1" size={24} color="#011481"/>
             )}
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.title}>👋 Bienvenue sur DLOG</Text>
+        <Text style={styles.title}>Salut {user?.nom} 👋</Text>
 
         <Card style={styles.imageCard}>
           <Image source={Images.backIcon} style={styles.backImage} />
         </Card>
 
         <Text style={styles.sectionTitle}>
-          <MaterialCommunityIcons name="file-document-multiple" size={20} color="#333" /> En attente de validation
+          <MaterialCommunityIcons name="clock-outline" size={20} color="#FFA500" /> En attente de validation
         </Text>
 
         <TextInput
@@ -191,7 +189,6 @@ const Home = () => {
           }}
         />
 
-        {/* List */}
         <View style={{ marginBottom: 40 }}>
           {bon.length === 0 ? (
             <View style={styles.emptyState}>
@@ -250,10 +247,9 @@ const Home = () => {
         </View>
       </ScrollView>
 
-      {/* Snackbar */}
       <View style={{ 
         position: 'absolute', 
-        bottom: 56, // ou la hauteur de ta bottom bar (exemple: 56)
+        bottom: 56,
         width: '100%', 
         zIndex: 9999,
         elevation: 9999,
@@ -363,7 +359,6 @@ const Home = () => {
           </Modal>
         )}
 
-
     </View>
   );
 };
@@ -374,7 +369,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingVertical: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
   },
   container: {
     paddingHorizontal: 20,
@@ -391,12 +386,15 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   avatarCircle: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 23,
-    backgroundColor: '#007bff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logoIcon: {
+    width: '100%',
+    height:'100%'
   },
   avatarText: {
     color: '#fff',
@@ -415,6 +413,11 @@ const styles = StyleSheet.create({
     color: '#777',
     fontFamily: 'Inter-Regular',
   },
+  titleApp: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#011481'
+  },
   title: {
     marginVertical: 15,
     fontWeight: 'bold',
@@ -427,6 +430,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 3,
     marginBottom: 20,
+    backgroundColor: '#fff',
+
   },
   backImage: {
     width: '100%',

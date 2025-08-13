@@ -5,5 +5,6 @@ export const Images = {
  listReservation : require('./listeReservation.png'),
  bonIcon : require('./bon.png'),
  listBonIcon : require('./listeBon.png'),
- validateurIcon : require('./valideIcon.png')
+ validateurIcon : require('./valideIcon.png'),
+ logoIcon : require('./gtm.png')
 }

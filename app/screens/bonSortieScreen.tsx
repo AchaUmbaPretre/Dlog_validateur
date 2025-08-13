@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { Button, Card, Surface, TextInput, Title } from "react-native-paper";
 import { useSelector } from "react-redux";
-
 import { useFetchData } from "@/hooks/useFetchData";
 import { RootState } from "@/redux/store";
 import { getAffectationDemandeOne, postBandeSortie } from "@/services/charroiService";
