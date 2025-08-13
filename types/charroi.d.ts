@@ -59,6 +59,7 @@ export interface BonSortie {
   motif: string;
   nom_statut_bs: string;
   retour_time: string;
+  nom_service: string;
 }
 
 export interface AffectationItem {
