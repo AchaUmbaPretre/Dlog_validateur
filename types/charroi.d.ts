@@ -77,3 +77,25 @@ export interface AffectationItem {
   personne_bord: string
   nom_statut_bs: string
 }
+
+export type BonSortieDisplay = {
+  id_bande_sortie: number;
+  id_bon: number;
+  nom_destination: string;
+  nom_chauffeur: string;
+  nom_marque: string;
+  immatriculation: string;
+  dateHeurePrevue?: string;
+  prenom_chauffeur: string;
+  user_cr: string;
+  nom_statut_bs: string;
+  sortie_time?: string | undefined;
+  retour_time?: string | undefined;
+  date_retour:string;
+  date_prevue: string;
+  nom_motif_demande: string;
+  destination: string;
+  motif: string;
+  nom_cat: string;
+  etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
+};

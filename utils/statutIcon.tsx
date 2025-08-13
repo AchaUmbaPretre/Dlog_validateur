@@ -10,7 +10,6 @@ export const getStatutBS = (statut?: string) => {
       return { icon: 'arrow-right', color: '#1890ff' };
     case 'En attente':
       return { icon: 'clock', color: 'orange' };
-    // ajoute les autres cas ici selon tes besoins
     default:
       return { icon: 'info', color: '#6c757d' };
   }

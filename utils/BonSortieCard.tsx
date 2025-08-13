@@ -1,4 +1,4 @@
-import { BonSortie } from '@/types';
+import { BonSortie, BonSortieDisplay } from '@/types';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import React from 'react';
@@ -6,33 +6,10 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { getStatutBS } from './statutIcon';
 
-type BonSortieDisplay = {
-  id_bande_sortie: number;
-  id_bon: number;
-  nom_destination: string;
-  nom_chauffeur: string;
-  nom_marque: string;
-  immatriculation: string;
-  dateHeurePrevue?: string;
-  prenom_chauffeur: string;
-  user_cr: string;
-  nom_statut_bs: string;
-  sortie_time?: string | undefined;
-  retour_time?: string | undefined;
-  date_retour:string;
-  date_prevue: string;
-  nom_motif_demande: string;
-  destination: string;
-  motif: string;
-  nom_cat: string;
-  etat?: 'aujourdhui' | 'anterieur' | 'ulterieur';
-};
-
 type Props = {
   data: BonSortieDisplay;
   onFinish: (d: BonSortie) => void;
   onViewDetail: (d: BonSortie) => void;
-
 };
 
 export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail }) => {
