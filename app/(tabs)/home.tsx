@@ -107,8 +107,8 @@ const Home = () => {
 
   const onFinish = (d: BonSortie): void => {
     const heure = d.date_prevue
-      ? moment(d.date_prevue).format('HH:mm')
-      : '—';
+    ? formatDateSafe(d.date_prevue)
+    : '—';
 
     const message = `🚚 Destination : ${d.nom_destination}\n👨‍✈️ Chauffeur : ${d.nom_chauffeur}\n🚗 Marque : ${d.nom_marque}\n🕒 Heure prévue : ${heure}\n\nSouhaitez-vous valider ce bon ?`;
 

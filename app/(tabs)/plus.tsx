@@ -18,10 +18,10 @@ import {
 import { ActivityIndicator, Card, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import BonSortieScreen from '../screens/bonSortieScreen';
 import CourseScreen from '../screens/courseScreen';
 import ListBonScreen from '../screens/listBonScreen';
 import ListCourseScreen from '../screens/listCourseScreen';
+import ListeInfoSortieRetour from '../screens/listeInfoSortieRetour';
 
 type ModalType = 'course' | 'listCourse' | 'bon' | 'listBon' | 'bons' | null;
 
@@ -82,12 +82,12 @@ const Plus = () => {
       bgColor: 'rgba(52, 199, 89, 0.1)',
       modalKey: 'listCourse',
     },
-/*     {
-      label: 'Bon de sortie',
+    {
+      label: 'Infos',
       icon: Images.bonIcon,
       bgColor: 'rgba(255, 149, 0, 0.1)',
-      modalKey: 'bon',
-    }, */
+      modalKey: 'bons',
+    },
     {
       label: 'Liste des bons',
       icon: Images.listBonIcon,
@@ -114,7 +114,7 @@ const Plus = () => {
       case 'listCourse':
         return <ListCourseScreen />;
       case 'bons':
-        return <BonSortieScreen />;
+        return <ListeInfoSortieRetour />;
       case 'listBon':
         return <ListBonScreen />;
       default:

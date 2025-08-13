@@ -27,6 +27,7 @@ export const getDestination = () => fetchData('destination');
 export const getVehicule = () => fetchData('vehicule');
 export const getAffectationDemande = () => fetchData('affectation_demande');
 export const getBandeSortie = () => fetchData('bande_sortie');
+export const getInfoSortieRetour = () => fetchData('info_sortie_retour');
 
 export const getAffectationDemandeOne = async (
   id: number

@@ -44,11 +44,12 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
   return (
     <Card style={[styles.card, { borderLeftColor: getEtatColor() }]}>
       <Card.Content>
-        <View style={styles.row}>
-          <MaterialCommunityIcons name="map-marker" size={20} color="#007bff" />
-          <Text style={styles.label}>Destination :</Text>
+        <Text style={styles.row}>
+          <MaterialCommunityIcons name="map-marker" size={20} color="#007bff" />{' '}
+          <Text style={styles.label}>Destination :</Text>{' '}
           <Text style={styles.value}>{data.nom_destination}</Text>
-        </View>
+        </Text>
+
 
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#007bff" />
