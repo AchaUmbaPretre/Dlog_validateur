@@ -34,7 +34,7 @@ const Plus = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth?.currentUser);
-
+  
   const handleLogout = () => {
     Alert.alert(
       'Déconnexion',
