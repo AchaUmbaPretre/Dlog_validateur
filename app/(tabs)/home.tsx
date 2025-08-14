@@ -3,6 +3,8 @@ import { logout } from '@/redux/authSlice';
 import { getBandeSortieUnique, postValidationDemande } from '@/services/charroiService';
 import { BonSortie } from '@/types';
 import { BonSortieCard } from '@/utils/BonSortieCard';
+import { formatDateSafe } from '@/utils/dateUtils';
+import useNotificationService from '@/utils/NotificationService';
 import { isOnline, storePendingValidation, syncPendingValidations } from '@/utils/offlineSyncUtils';
 import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -35,6 +37,8 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBon, setSelectedBon] = useState<BonSortie | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  useNotificationService(userId);
 
   const handleViewDetail = (bon: BonSortie) => {
     setSelectedBon(bon);

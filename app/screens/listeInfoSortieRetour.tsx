@@ -1,6 +1,7 @@
 import { getInfoSortieRetour } from '@/services/charroiService';
 import { BonSortie } from '@/types';
 import { syncPendingValidations } from '@/utils/offlineSyncUtils';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -78,21 +79,21 @@ const ListeInfoSortieRetour = () => {
     op.nom_marque?.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const getTypeColor = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'Sortie':
-        return '#FF6B6B';
-      case 'Retour':
-        return '#4ECDC4';
-      default:
-        return '#555';
-    }
-  };
+const getTypeInfo = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case 'sortie':
+      return { color: '#FF6B6B', icon: <MaterialIcons name="exit-to-app" size={16} color="#FF6B6B" /> };
+    case 'retour':
+      return { color: '#4ECDC4', icon: <FontAwesome5 name="undo" size={16} color="#4ECDC4" /> };
+    default:
+      return { color: '#555', icon: null };
+  }
+};
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text style={styles.title}>Dernières opérations des véhicules</Text>
+        <Text style={styles.title}>Last Checkpoint</Text>
 
         <TextInput
           style={styles.searchInput}
@@ -109,8 +110,8 @@ const ListeInfoSortieRetour = () => {
                   <Text style={styles.index}>{index + 1}.</Text>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.vehicle}>{op.immatriculation || '-'} - {op.nom_marque || '-'}</Text>
-                    <Text style={[styles.type, { color: getTypeColor(op.type) }]}>
-                      {op.type || '-'} - {op.created_at ? moment(op.created_at).format('DD/MM/YYYY HH:mm') : '-'}
+                    <Text style={[styles.type, { color: getTypeInfo(op.type).color }]}>
+                      {getTypeInfo(op.type).icon} {op.type || '-'} - {op.created_at ? moment(op.created_at).format('DD/MM/YYYY HH:mm') : '-'}
                     </Text>
                   </View>
                 </View>
@@ -137,8 +138,8 @@ const ListeInfoSortieRetour = () => {
                 <Text style={styles.detail}>Client: {selectedOperation.nom_client || '-'}</Text>
                 <Text style={styles.detail}>Destination: {selectedOperation.nom_destination || '-'}</Text>
                 <Text style={styles.detail}>Service: {selectedOperation.nom_service || '-'}</Text>
-                <Text style={[styles.detail, { color: getTypeColor(selectedOperation.type) }]}>
-                  Type: {selectedOperation.type || '-'}
+                <Text style={[styles.detail, { color: getTypeInfo(selectedOperation.type).color }]}>
+                  {getTypeInfo(selectedOperation.type).icon} Type: {selectedOperation.type || '-'}
                 </Text>
                 <Text style={styles.detail}>Mouvement Exceptionnel: {selectedOperation.mouvement_exceptionnel ? 'Oui' : 'Non'}</Text>
                 <Text style={styles.detail}>Date: {selectedOperation.created_at ? moment(selectedOperation.created_at).format('DD/MM/YYYY HH:mm') : '-'}</Text>

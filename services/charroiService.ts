@@ -88,3 +88,20 @@ export const postBandeSortie = async (
     throw error;
   }
 };
+
+//Notification
+export const savePushToken = async (
+  userId: number,
+  token: string
+): Promise<AxiosResponse<any> | void> => {
+  try {
+    const response = await axios.post(`${BASE_URL}/savePushToken`, {
+      userId,
+      expo_push_token: token, 
+    });
+    console.log('✅ Push token enregistré sur le serveur');
+    return response;
+  } catch (err) {
+    console.error('❌ Erreur enregistrement push token:', err);
+  }
+};

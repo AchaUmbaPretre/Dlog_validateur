@@ -1,9 +1,9 @@
 import { BonSortie, BonSortieDisplay } from '@/types';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import moment from 'moment';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
+import { formatDateSafe } from './dateUtils';
 import { getStatutBS } from './statutIcon';
 
 type Props = {
@@ -15,30 +15,17 @@ type Props = {
 export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail }) => {
   const getEtatColor = () => {
     switch (data.etat) {
-      case 'aujourdhui':
-        return '#28a745';
-      case 'anterieur':
-        return '#dc3545';
-      case 'ulterieur':
-        return '#ffc107';
-      default:
-        return '#007bff';
+      case 'aujourdhui': return '#28a745';
+      case 'anterieur': return '#dc3545';
+      case 'ulterieur': return '#ffc107';
+      default: return '#007bff';
     }
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '—';
-    return moment(dateString).format('HH:mm - DD/MM/YYYY');
   };
 
   const renderHeure = () => {
-    if (data.retour_time) {
-      return { label: 'Heure retour', value: formatDate(data.retour_time), color: '#28a745' };
-    }
-    if (data.sortie_time) {
-      return { label: 'Heure sortie', value: formatDate(data.sortie_time), color: '#007bff' };
-    }
-    return { label: 'Heure prévue', value: formatDate(data.dateHeurePrevue), color: '#17a2b8' };
+    if (data.retour_time) return { label: 'Heure retour', value: formatDateSafe(data.retour_time), color: '#28a745' };
+    if (data.sortie_time) return { label: 'Heure sortie', value: formatDateSafe(data.sortie_time), color: '#007bff' };
+    return { label: 'Heure prévue', value: formatDateSafe(data.dateHeurePrevue), color: '#17a2b8' };
   };
 
   return (
@@ -49,7 +36,6 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           <Text style={styles.label}>Destination :</Text>{' '}
           <Text style={styles.value}>{data.nom_destination}</Text>
         </Text>
-
 
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#007bff" />
@@ -72,9 +58,7 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
         <View style={styles.row}>
           <Feather name="clock" size={20} color={renderHeure().color} />
           <Text style={styles.label}>{renderHeure().label} :</Text>
-          <Text style={[styles.value, { color: renderHeure().color }]}>
-            {renderHeure().value}
-          </Text>
+          <Text style={[styles.value, { color: renderHeure().color }]}>{renderHeure().value}</Text>
         </View>
 
         <View style={styles.row}>
@@ -91,23 +75,17 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
 
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#007bff" />
-          <Text style={styles.label}>Créé par  :</Text>
+          <Text style={styles.label}>Créé par :</Text>
           <Text style={styles.value}>{data.user_cr}</Text>
         </View>
-        
+
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.buttonView]}
-            onPress={() => onViewDetail(data)}
-          >
+          <TouchableOpacity style={[styles.button, styles.buttonView]} onPress={() => onViewDetail(data)}>
             <Feather name="eye" size={18} color="#fff" />
             <Text style={styles.buttonText}>Voir</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, styles.buttonValidate]}
-            onPress={() => onFinish(data)}
-          >
+          <TouchableOpacity style={[styles.button, styles.buttonValidate]} onPress={() => onFinish(data)}>
             <Feather name="check-circle" size={18} color="#fff" />
             <Text style={styles.buttonText}>Valider</Text>
           </TouchableOpacity>
@@ -116,6 +94,9 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
     </Card>
   );
 };
+
+// ...styles inchangés
+
 
 const styles = StyleSheet.create({
   card: {
