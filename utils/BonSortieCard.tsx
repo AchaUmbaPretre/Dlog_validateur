@@ -23,50 +23,47 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
   };
 
   const renderHeure = () => {
-    if (data.retour_time) return { label: 'Heure retour', value: formatDateSafe(data.retour_time), color: '#10B981' };
-    if (data.sortie_time) return { label: 'Heure sortie', value: formatDateSafe(data.sortie_time), color: '#3B82F6' };
-    return { label: 'Heure prévue', value: formatDateSafe(data.dateHeurePrevue), color: '#0EA5E9' };
-  };
+  if (data.retour_time)
+    return { label: 'Heure retour', value: formatDateSafe(data.retour_time), color: '#10B981' };
+  if (data.sortie_time)
+    return { label: 'Heure sortie', value: formatDateSafe(data.sortie_time), color: '#3B82F6' };
+  return { label: 'Heure prévue', value: formatDateSafe(data.date_prevue), color: '#0EA5E9' };
+};
+
 
   return (
     <Card style={[styles.card, { borderLeftColor: getEtatColor() }]}>
       <Card.Content>
-        {/* Ligne Destination */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="map-marker" size={20} color="#3B82F6" />
           <Text style={styles.label}>Destination :</Text>
           <Text style={styles.value}>{data.nom_destination}</Text>
         </View>
 
-        {/* Ligne Chauffeur */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#3B82F6" />
           <Text style={styles.label}>Chauffeur :</Text>
           <Text style={styles.value}>{data.nom_chauffeur} {data.prenom_chauffeur}</Text>
         </View>
 
-        {/* Ligne Véhicule */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="car" size={20} color="#3B82F6" />
           <Text style={styles.label}>Véhicule :</Text>
           <Text style={styles.value}>{data.nom_marque}</Text>
         </View>
 
-        {/* Ligne Immatriculation */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="card-text" size={20} color="#3B82F6" />
           <Text style={styles.label}>Immatriculation :</Text>
           <Text style={styles.value}>{data.immatriculation}</Text>
         </View>
 
-        {/* Ligne Heure */}
         <View style={styles.row}>
           <Feather name="clock" size={20} color={renderHeure().color} />
           <Text style={styles.label}>{renderHeure().label} :</Text>
           <Text style={[styles.value, { color: renderHeure().color }]}>{renderHeure().value}</Text>
         </View>
 
-        {/* Ligne Statut */}
         <View style={styles.row}>
           <MaterialCommunityIcons
             name={getStatutBS(data.nom_statut_bs).icon as any}
@@ -79,27 +76,19 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
-        {/* Ligne Créé par */}
         <View style={styles.row}>
           <MaterialCommunityIcons name="account-tie" size={20} color="#3B82F6" />
           <Text style={styles.label}>Créé par :</Text>
           <Text style={styles.value}>{data.user_cr}</Text>
         </View>
 
-        {/* Boutons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.buttonView]}
-            onPress={() => onViewDetail(data)}
-          >
+          <TouchableOpacity style={[styles.button, styles.buttonView]} onPress={() => onViewDetail(data)}>
             <Feather name="eye" size={18} color="#fff" />
             <Text style={styles.buttonText}>Voir</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, styles.buttonValidate]}
-            onPress={() => onFinish(data)}
-          >
+          <TouchableOpacity style={[styles.button, styles.buttonValidate]} onPress={() => onFinish(data)}>
             <Feather name="check-circle" size={18} color="#fff" />
             <Text style={styles.buttonText}>Valider</Text>
           </TouchableOpacity>
@@ -110,63 +99,13 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
 };
 
 const styles = StyleSheet.create({
-  card: {
-    marginBottom: 16,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    borderLeftWidth: 6,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 2,
-  },
-  label: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6B7280', // gris moderne
-    flexShrink: 0,
-  },
-  value: {
-    marginLeft: 6,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827', // texte principal
-    flexShrink: 1,
-    flexWrap: 'wrap',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    elevation: 1,
-  },
-  buttonView: {
-    backgroundColor: '#6B7280', // gris neutre
-  },
-  buttonValidate: {
-    backgroundColor: '#2563EB', // bleu pro
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 6,
-  },
+  card: { marginBottom: 16, borderRadius: 16, backgroundColor: '#fff', borderLeftWidth: 6, elevation: 4, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, paddingVertical: 6, paddingHorizontal: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingVertical: 2 },
+  label: { marginLeft: 8, fontSize: 14, fontWeight: '500', color: '#6B7280', flexShrink: 0 },
+  value: { marginLeft: 6, fontSize: 14, fontWeight: '600', color: '#111827', flexShrink: 1, flexWrap: 'wrap' },
+  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
+  button: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, elevation: 1 },
+  buttonView: { backgroundColor: '#6B7280' },
+  buttonValidate: { backgroundColor: '#2563EB' },
+  buttonText: { color: '#fff', fontWeight: '600', fontSize: 14, marginLeft: 6 },
 });

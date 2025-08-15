@@ -229,18 +229,17 @@ const Home = () => {
                 <View key={etat} style={{ marginBottom: 20 }}>
                   <Text style={styles.groupTitle}>{titre}</Text>
                   {filtered.map((item, index) => (
-                    <BonSortieCard
+                   <BonSortieCard
                       key={`${etat}-${index}`}
                       data={{
                         ...item,
-                        dateHeurePrevue: item.date_prevue
-                          ? moment(item.date_prevue).format('DD-MM-YYYY HH:mm')
-                          : '',
                         immatriculation: item.immatriculation || 'N/A',
                       }}
                       onFinish={onFinish}
                       onViewDetail={handleViewDetail}
                     />
+
+
                   ))}
                 </View>
               );
