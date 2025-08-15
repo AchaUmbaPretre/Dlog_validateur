@@ -1,11 +1,9 @@
 import { getAffectationDemande } from '@/services/charroiService';
 import { AffectationItem } from '@/types';
-import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -159,14 +157,11 @@ const ListCourseScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <AntDesign name="arrowleft" size={24} color="#007AFF" />
-      </Pressable>
       <View style={styles.searchContainer}>
         <MaterialCommunityIcons name="magnify" size={20} color="#666" />
         <TextInput
           style={styles.searchInput}
-          placeholder="🔍 Rechercher par chauffeur, véhicule, destination..."
+          placeholder="Rechercher par chauffeur, véhicule..."
           placeholderTextColor="#999"
           value={search}
           onChangeText={setSearch}

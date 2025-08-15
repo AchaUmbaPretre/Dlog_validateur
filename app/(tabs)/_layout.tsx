@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { useSelector } from 'react-redux';
 
 export default function HomeTabsLayout() {
   const theme = useColorScheme();
   const isDark = theme === 'dark';
+  const role = useSelector((state: any) => state.auth?.currentUser?.role);
 
   return (
     <Tabs
@@ -56,16 +58,17 @@ export default function HomeTabsLayout() {
           tabBarButton: (props) => (
             <View style={{ position: 'absolute', top: -28, alignSelf: 'center' }}>
               <TouchableOpacity
-                onPress={props.onPress}
+                onPress={role === 'RH' ? undefined : props.onPress} // désactive l'action pour RH
                 activeOpacity={0.85}
+                disabled={role === 'RH'} // désactive le bouton
                 style={{
                   width: 66,
                   height: 66,
                   borderRadius: 33,
-                  backgroundColor: '#007AFF',
+                  backgroundColor: role === 'RH' ? '#aaa' : '#007AFF', // couleur différente pour désactivé
                   justifyContent: 'center',
                   alignItems: 'center',
-                  shadowColor: '#007AFF',
+                  shadowColor: role === 'RH' ? '#aaa' : '#007AFF',
                   shadowOffset: { width: 0, height: 6 },
                   shadowOpacity: 0.3,
                   shadowRadius: 8,

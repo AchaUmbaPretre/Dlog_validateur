@@ -110,7 +110,7 @@ useEffect(() => {
         <MaterialCommunityIcons name="magnify" size={20} color="#666" />
         <TextInput
           style={styles.searchInput}
-          placeholder="🔍 Rechercher par nom, chauffeur ou immatriculation..."
+          placeholder="Rechercher par nom, chauffeur ou imma..."
           placeholderTextColor="#999"
           value={search}
           onChangeText={setSearch}

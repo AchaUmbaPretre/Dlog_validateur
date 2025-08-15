@@ -15,52 +15,58 @@ type Props = {
 export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail }) => {
   const getEtatColor = () => {
     switch (data.etat) {
-      case 'aujourdhui': return '#28a745';
-      case 'anterieur': return '#dc3545';
-      case 'ulterieur': return '#ffc107';
-      default: return '#007bff';
+      case 'aujourdhui': return '#34D399'; // vert doux
+      case 'anterieur': return '#F87171'; // rouge doux
+      case 'ulterieur': return '#FBBF24'; // jaune vif
+      default: return '#3B82F6'; // bleu pro
     }
   };
 
   const renderHeure = () => {
-    if (data.retour_time) return { label: 'Heure retour', value: formatDateSafe(data.retour_time), color: '#28a745' };
-    if (data.sortie_time) return { label: 'Heure sortie', value: formatDateSafe(data.sortie_time), color: '#007bff' };
-    return { label: 'Heure prévue', value: formatDateSafe(data.dateHeurePrevue), color: '#17a2b8' };
+    if (data.retour_time) return { label: 'Heure retour', value: formatDateSafe(data.retour_time), color: '#10B981' };
+    if (data.sortie_time) return { label: 'Heure sortie', value: formatDateSafe(data.sortie_time), color: '#3B82F6' };
+    return { label: 'Heure prévue', value: formatDateSafe(data.dateHeurePrevue), color: '#0EA5E9' };
   };
 
   return (
     <Card style={[styles.card, { borderLeftColor: getEtatColor() }]}>
       <Card.Content>
-        <Text style={styles.row}>
-          <MaterialCommunityIcons name="map-marker" size={20} color="#007bff" />{' '}
-          <Text style={styles.label}>Destination :</Text>{' '}
-          <Text style={styles.value}>{data.nom_destination}</Text>
-        </Text>
-
+        {/* Ligne Destination */}
         <View style={styles.row}>
-          <MaterialCommunityIcons name="account-tie" size={20} color="#007bff" />
+          <MaterialCommunityIcons name="map-marker" size={20} color="#3B82F6" />
+          <Text style={styles.label}>Destination :</Text>
+          <Text style={styles.value}>{data.nom_destination}</Text>
+        </View>
+
+        {/* Ligne Chauffeur */}
+        <View style={styles.row}>
+          <MaterialCommunityIcons name="account-tie" size={20} color="#3B82F6" />
           <Text style={styles.label}>Chauffeur :</Text>
           <Text style={styles.value}>{data.nom_chauffeur} {data.prenom_chauffeur}</Text>
         </View>
 
+        {/* Ligne Véhicule */}
         <View style={styles.row}>
-          <MaterialCommunityIcons name="car" size={20} color="#007bff" />
+          <MaterialCommunityIcons name="car" size={20} color="#3B82F6" />
           <Text style={styles.label}>Véhicule :</Text>
           <Text style={styles.value}>{data.nom_marque}</Text>
         </View>
 
+        {/* Ligne Immatriculation */}
         <View style={styles.row}>
-          <MaterialCommunityIcons name="card-text" size={20} color="#007bff" />
+          <MaterialCommunityIcons name="card-text" size={20} color="#3B82F6" />
           <Text style={styles.label}>Immatriculation :</Text>
           <Text style={styles.value}>{data.immatriculation}</Text>
         </View>
 
+        {/* Ligne Heure */}
         <View style={styles.row}>
           <Feather name="clock" size={20} color={renderHeure().color} />
           <Text style={styles.label}>{renderHeure().label} :</Text>
           <Text style={[styles.value, { color: renderHeure().color }]}>{renderHeure().value}</Text>
         </View>
 
+        {/* Ligne Statut */}
         <View style={styles.row}>
           <MaterialCommunityIcons
             name={getStatutBS(data.nom_statut_bs).icon as any}
@@ -73,19 +79,27 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
           </Text>
         </View>
 
+        {/* Ligne Créé par */}
         <View style={styles.row}>
-          <MaterialCommunityIcons name="account-tie" size={20} color="#007bff" />
+          <MaterialCommunityIcons name="account-tie" size={20} color="#3B82F6" />
           <Text style={styles.label}>Créé par :</Text>
           <Text style={styles.value}>{data.user_cr}</Text>
         </View>
 
+        {/* Boutons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.button, styles.buttonView]} onPress={() => onViewDetail(data)}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonView]}
+            onPress={() => onViewDetail(data)}
+          >
             <Feather name="eye" size={18} color="#fff" />
             <Text style={styles.buttonText}>Voir</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonValidate]} onPress={() => onFinish(data)}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonValidate]}
+            onPress={() => onFinish(data)}
+          >
             <Feather name="check-circle" size={18} color="#fff" />
             <Text style={styles.buttonText}>Valider</Text>
           </TouchableOpacity>
@@ -95,59 +109,56 @@ export const BonSortieCard: React.FC<Props> = ({ data, onFinish, onViewDetail })
   );
 };
 
-// ...styles inchangés
-
-
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 14,
-    borderRadius: 14,
+    marginBottom: 16,
+    borderRadius: 16,
     backgroundColor: '#fff',
-    borderLeftWidth: 5,
-    elevation: 3,
+    borderLeftWidth: 6,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    paddingVertical: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    paddingVertical: 6,
+    paddingHorizontal: 10,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
     paddingVertical: 2,
   },
   label: {
     marginLeft: 8,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500',
-    fontFamily: 'Inter-Medium',
     color: '#6B7280', // gris moderne
+    flexShrink: 0,
   },
   value: {
-    marginLeft: 4,
+    marginLeft: 6,
     fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     color: '#111827', // texte principal
     flexShrink: 1,
     flexWrap: 'wrap',
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 14,
+    justifyContent: 'space-between',
+    marginTop: 16,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     elevation: 1,
   },
   buttonView: {
     backgroundColor: '#6B7280', // gris neutre
-    marginRight: 10,
   },
   buttonValidate: {
     backgroundColor: '#2563EB', // bleu pro
@@ -155,8 +166,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: '600',
-    fontFamily: 'Inter-SemiBold',
-    marginLeft: 6,
     fontSize: 14,
+    marginLeft: 6,
   },
 });
