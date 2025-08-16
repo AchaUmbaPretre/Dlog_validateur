@@ -1,16 +1,24 @@
-export const getStatutBS = (statut?: string) => {
+
+interface StatutBS {
+  icon: string;
+  color: string;
+}
+
+
+export const getStatutBS = (statut?: string): StatutBS => {
   switch (statut) {
+    case 'BS validé':
+      return { icon: 'checksquare', color: 'green' };
+    case 'Départ':
+      return { icon: 'arrowright', color: '#2f54eb' };
+    case 'Départ sans BS':
+      return { icon: 'warning', color: 'volcano' };
     case 'Retour':
       return { icon: 'undo', color: 'green' };
-    case 'Sortie':
-      return { icon: 'export', color: 'orange' };
-    case 'Annulé':
-      return { icon: 'close-circle', color: 'red' };
-    case 'Départ':
-      return { icon: 'arrow-right', color: '#1890ff' };
-    case 'En attente':
-      return { icon: 'clock', color: 'orange' };
+    case 'Retour sans BS':
+      return { icon: 'warning', color: 'red' };
     default:
-      return { icon: 'information', color: '#6c757d' };
+      return { icon: 'infocirlce', color: '#6c757d' };
   }
 };
+
